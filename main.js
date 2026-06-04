@@ -44,7 +44,7 @@ function toSvg(clientX, clientY) {
 // ---- 키보드/마우스 회전 (강아지가 사용하는 방향, 살짝 비스듬) ----
 // index.html 의 keyboard transform="rotate(185 115 47)" 와 일치해야 함
 const VIEW_ROT_DEG = 185;
-const KB_PIVOT = { x: 115, y: 47 };
+const KB_PIVOT = { x: 163, y: 39 };
 
 function rotateAround(px, py, cx, cy, deg) {
   const rad = (deg * Math.PI) / 180;
@@ -56,67 +56,153 @@ function rotateAround(px, py, cx, cy, deg) {
 }
 
 // ---- 키보드 생성 ----
-const KB = { gx: 195, gy: 482, kw: 20, kh: 16, gapx: 3, gapy: 3 };
-const ROWS = [
-  { keys: "1234567890", indent: 0 },
-  { keys: "QWERTYUIOP", indent: 8 },
-  { keys: "ASDFGHJKL", indent: 18 },
-  { keys: "ZXCVBNM", indent: 34 },
-];
-const keyMap = {}; // 정규화된 키 -> { el, cx, cy } — cx/cy 는 SVG 전역(회전 적용) 좌표
-const KB_MID_X = KB.gx + (10 * (KB.kw + KB.gapx)) / 2; // 좌/우손 분기 기준 x (회전 전 로컬 기준)
+const KB = {
+  gx: 205, gy: 463,
+  u: 17,         // 1u 키 폭
+  kh: 12,        // 메인 키 높이
+  gapx: 1.5,
+  gapy: 1.5,
+  fnH: 7,        // 펑션 키 높이
+  fnGap: 4.5,    // 펑션 ↔ 메인 행 간격
+  arrowGap: 4,   // 메인 ↔ 방향키 간격
+};
 
-function makeKey(label, x, y, w, normalized) {
+// 펑션 행 (Esc + F1~F12)
+const FN_ROW = [
+  { label: "Esc", k: "escape" },
+  { label: "F1", k: "f1" },   { label: "F2", k: "f2" },
+  { label: "F3", k: "f3" },   { label: "F4", k: "f4" },
+  { label: "F5", k: "f5" },   { label: "F6", k: "f6" },
+  { label: "F7", k: "f7" },   { label: "F8", k: "f8" },
+  { label: "F9", k: "f9" },   { label: "F10", k: "f10" },
+  { label: "F11", k: "f11" }, { label: "F12", k: "f12" },
+];
+
+// 메인 5행 — w 는 u 의 배수 (생략 시 1)
+const MAIN_ROWS = [
+  [ // 숫자 행
+    { label: "`", k: "`" },
+    { label: "1", k: "1" }, { label: "2", k: "2" }, { label: "3", k: "3" },
+    { label: "4", k: "4" }, { label: "5", k: "5" }, { label: "6", k: "6" },
+    { label: "7", k: "7" }, { label: "8", k: "8" }, { label: "9", k: "9" },
+    { label: "0", k: "0" }, { label: "-", k: "-" }, { label: "=", k: "=" },
+    { label: "⌫", k: "backspace", w: 1.5 },
+  ],
+  [ // Tab + QWERTY 행
+    { label: "Tab", k: "tab", w: 1.5 },
+    { label: "Q", k: "q" }, { label: "W", k: "w" }, { label: "E", k: "e" },
+    { label: "R", k: "r" }, { label: "T", k: "t" }, { label: "Y", k: "y" },
+    { label: "U", k: "u" }, { label: "I", k: "i" }, { label: "O", k: "o" },
+    { label: "P", k: "p" }, { label: "[", k: "[" }, { label: "]", k: "]" },
+    { label: "\\", k: "\\" },
+  ],
+  [ // Caps + ASDF + Enter 행
+    { label: "Caps", k: "capslock", w: 1.7 },
+    { label: "A", k: "a" }, { label: "S", k: "s" }, { label: "D", k: "d" },
+    { label: "F", k: "f" }, { label: "G", k: "g" }, { label: "H", k: "h" },
+    { label: "J", k: "j" }, { label: "K", k: "k" }, { label: "L", k: "l" },
+    { label: ";", k: ";" }, { label: "'", k: "'" },
+    { label: "Enter", k: "enter", w: 1.8 },
+  ],
+  [ // Shift + ZXCV + Shift 행
+    { label: "Shift", k: "shift", w: 2.2 },
+    { label: "Z", k: "z" }, { label: "X", k: "x" }, { label: "C", k: "c" },
+    { label: "V", k: "v" }, { label: "B", k: "b" }, { label: "N", k: "n" },
+    { label: "M", k: "m" }, { label: ",", k: "," }, { label: ".", k: "." },
+    { label: "/", k: "/" }, { label: "Shift", k: "shift", w: 2.3 },
+  ],
+  [ // Ctrl Win Alt Space Alt Win Fn Ctrl
+    { label: "Ctrl", k: "control", w: 1.5 },
+    { label: "Win", k: "meta", w: 1.2 },
+    { label: "Alt", k: "alt", w: 1.2 },
+    { label: "", k: " ", w: 5.7 },
+    { label: "Alt", k: "alt", w: 1.2 },
+    { label: "Win", k: "meta", w: 1.2 },
+    { label: "Fn", k: "fn", w: 1 },
+    { label: "Ctrl", k: "control", w: 1.5 },
+  ],
+];
+
+// 우측 방향키 (인버티드 T)
+const ARROW_KEYS = [
+  { label: "▲", k: "arrowup",    col: 1, row: 3 },
+  { label: "◀", k: "arrowleft",  col: 0, row: 4 },
+  { label: "▼", k: "arrowdown",  col: 1, row: 4 },
+  { label: "▶", k: "arrowright", col: 2, row: 4 },
+];
+
+// normalized 키 -> [{el, cx, cy, localCx}, ...] (좌/우 Shift 처럼 같은 키가 여러 개일 수 있어 배열)
+const keyMap = {};
+
+function makeKey(label, x, y, w, h, normalized, sizeClass) {
   const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
-  g.setAttribute("class", "key");
+  g.setAttribute("class", "key" + (sizeClass ? " " + sizeClass : ""));
   g.setAttribute("transform", `translate(${x} ${y})`);
 
   const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
   rect.setAttribute("width", w);
-  rect.setAttribute("height", KB.kh);
-  rect.setAttribute("rx", 4);
+  rect.setAttribute("height", h);
+  rect.setAttribute("rx", Math.min(3, h * 0.3));
 
   const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
   text.setAttribute("x", w / 2);
-  text.setAttribute("y", KB.kh / 2);
+  text.setAttribute("y", h / 2);
   text.textContent = label;
 
   g.appendChild(rect);
   g.appendChild(text);
   keyboardG.appendChild(g);
 
-  // 키 중심을 키보드 로컬 좌표에서 회전 후 SVG 전역으로 변환
+  if (!normalized) return;
+
   const localCx = x + w / 2;
-  const localCy = y + KB.kh / 2;
+  const localCy = y + h / 2;
   const rotated = rotateAround(localCx, localCy, KB_PIVOT.x, KB_PIVOT.y, VIEW_ROT_DEG);
-  keyMap[normalized] = {
+  const entry = {
     el: g,
     cx: KB.gx + rotated.x,
     cy: KB.gy + rotated.y,
-    localCx: localCx, // 좌/우 분기용 (회전 전)
+    localCx,
   };
+  (keyMap[normalized] = keyMap[normalized] || []).push(entry);
 }
 
-ROWS.forEach((row, r) => {
-  const y = r * (KB.kh + KB.gapy);
-  [...row.keys].forEach((ch, i) => {
-    const x = row.indent + i * (KB.kw + KB.gapx);
-    makeKey(ch, x, y, KB.kw, ch.toLowerCase());
+// 펑션 행 — 좌측 정렬, 균등 폭
+{
+  let x = 0;
+  FN_ROW.forEach((key) => {
+    makeKey(key.label, x, 0, KB.u, KB.fnH, key.k, "fn");
+    x += KB.u + KB.gapx;
+  });
+}
+
+// 메인 5행
+const MAIN_OFFSET_Y = KB.fnH + KB.fnGap;
+MAIN_ROWS.forEach((row, r) => {
+  const y = MAIN_OFFSET_Y + r * (KB.kh + KB.gapy);
+  let x = 0;
+  row.forEach((key) => {
+    const kw = (key.w || 1) * KB.u;
+    const sizeClass = key.label.length > 1 ? "mod" : "";
+    makeKey(key.label, x, y, kw, KB.kh, key.k, sizeClass);
+    x += kw + KB.gapx;
   });
 });
-// 스페이스바
-{
-  const y = ROWS.length * (KB.kh + KB.gapy);
-  const w = 130;
-  const x = (10 * (KB.kw + KB.gapx) - w) / 2;
-  makeKey("space", x, y, w, " ");
-}
+
+// 우측 방향키 — 메인 영역(14.5u + 13갭) 우측에 인버티드 T 배치
+const MAIN_TOTAL_W = 14.5 * KB.u + 13 * KB.gapx;
+ARROW_KEYS.forEach((key) => {
+  const x = MAIN_TOTAL_W + KB.arrowGap + key.col * (KB.u + KB.gapx);
+  const y = MAIN_OFFSET_Y + key.row * (KB.kh + KB.gapy);
+  makeKey(key.label, x, y, KB.u, KB.kh, key.k, "arrow");
+});
 
 // ---- 상태 ----
-let deskMouse = { x: 508, y: 522 }; // 책상 위 마우스 목표 위치 (몸통쪽으로 더 가깝게)
-const mouseRange = { x: [485, 545], y: [510, 545] };
+// 키보드가 커진 만큼 마우스도 책상 우측으로 이동 (충돌 방지)
+let deskMouse = { x: 588, y: 524 };
+const mouseRange = { x: [560, 615], y: [512, 547] };
 
-const leftHome = keyMap["f"] || { cx: 360, cy: 540 };
+const leftHome = (keyMap["f"] && keyMap["f"][0]) || { cx: 360, cy: 540 };
 let handL = { x: leftHome.cx, y: leftHome.cy };
 let handR = { x: deskMouse.x, y: deskMouse.y - 8 };
 
@@ -130,8 +216,8 @@ let headBobTime = -9999;
 let hintFaded = false;
 function activity() {
   if (!hintFaded) {
-    hint.classList.add("fade");
-    hintFaded = true;
+    //hint.classList.add("fade");
+    //hintFaded = true;
   }
 }
 
@@ -161,19 +247,33 @@ function flashMouseBtn(el) {
   setTimeout(() => el.classList.remove("flash"), 200);
 }
 
+function normalizeKey(rawKey) {
+  if (rawKey == null) return null;
+  const k = String(rawKey);
+  if (k.length === 1) return k.toLowerCase();
+  if (k.toLowerCase() === "space") return " ";
+  // "ArrowUp"→"arrowup", "F1"→"f1", "Shift"/"Control"/"Alt"/"Meta",
+  // "Escape"/"Tab"/"Enter"/"Backspace"/"CapsLock" 모두 그대로 소문자화
+  return k.toLowerCase();
+}
+
 function handleKey(char) {
   activity();
   const now = performance.now();
   headBobTime = now;
 
-  const norm = char && char.length === 1 ? char.toLowerCase() : char === " " ? " " : null;
-  const target = norm && keyMap[norm];
-  if (!target) return; // 키보드에 그려지지 않은 키는 무시
+  const norm = normalizeKey(char);
+  const targets = norm && keyMap[norm];
+  if (!targets || !targets.length) return;
 
-  target.el.classList.add("active");
-  setTimeout(() => target.el.classList.remove("active"), 130);
+  // 같은 normalized 가 여러 키일 수 있음(좌/우 Shift 등) — 전부 깜빡임
+  targets.forEach((t) => {
+    t.el.classList.add("active");
+    setTimeout(() => t.el.classList.remove("active"), 130);
+  });
 
-  // 키보드는 항상 왼발로 타이핑 (오른발은 마우스 전담)
+  // 키보드는 항상 왼발로 타이핑 (오른발은 마우스 전담) — 첫 번째(좌측) 키 위치 사용
+  const target = targets[0];
   leftTap = { time: now, cx: target.cx, cy: target.cy };
 }
 

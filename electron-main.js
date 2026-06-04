@@ -5,12 +5,40 @@ const { uIOhook, UiohookKey } = require("uiohook-napi");
 let win = null;
 let tray = null;
 
-// uiohook 키코드 -> 문자 매핑 (렌더러의 키보드 강조에 사용)
+// uiohook 키코드 -> normalized 키 매핑 (렌더러의 키보드 강조에 사용)
+// 렌더러(main.js)의 keyMap 키 이름과 동일해야 함.
 const code2char = {};
 for (const [name, code] of Object.entries(UiohookKey)) {
   if (typeof code !== "number") continue;
-  if (name.length === 1) code2char[code] = name.toLowerCase(); // 알파벳/숫자
-  else if (name === "Space") code2char[code] = " ";
+  let mapped = null;
+  if (name.length === 1) mapped = name.toLowerCase(); // 알파벳/숫자
+  else if (name === "Space") mapped = " ";
+  else if (/^F\d{1,2}$/.test(name)) mapped = name.toLowerCase(); // F1~F12
+  else if (name === "Escape") mapped = "escape";
+  else if (name === "Tab") mapped = "tab";
+  else if (name === "Enter") mapped = "enter";
+  else if (name === "Backspace") mapped = "backspace";
+  else if (name === "CapsLock") mapped = "capslock";
+  else if (name === "ArrowUp") mapped = "arrowup";
+  else if (name === "ArrowDown") mapped = "arrowdown";
+  else if (name === "ArrowLeft") mapped = "arrowleft";
+  else if (name === "ArrowRight") mapped = "arrowright";
+  else if (/^Shift/.test(name)) mapped = "shift";
+  else if (/^(Ctrl|Control)/.test(name)) mapped = "control";
+  else if (/^Alt/.test(name)) mapped = "alt";
+  else if (/^Meta/.test(name)) mapped = "meta";
+  else if (name === "Minus") mapped = "-";
+  else if (name === "Equal") mapped = "=";
+  else if (name === "BracketLeft") mapped = "[";
+  else if (name === "BracketRight") mapped = "]";
+  else if (name === "Backslash") mapped = "\\";
+  else if (name === "Semicolon") mapped = ";";
+  else if (name === "Quote") mapped = "'";
+  else if (name === "Comma") mapped = ",";
+  else if (name === "Period") mapped = ".";
+  else if (name === "Slash") mapped = "/";
+  else if (name === "Backquote" || name === "Grave") mapped = "`";
+  if (mapped) code2char[code] = mapped;
 }
 
 // 화면 정규화용 (전역 좌표 -> 0~1 비율)
