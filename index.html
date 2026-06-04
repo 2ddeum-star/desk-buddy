@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Desk Buddy — 마우스/키보드 따라하는 캐릭터</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="hint" id="hint">화면 위에서 마우스를 움직이거나 키보드를 눌러보세요 ✨</div>
+
+  <div class="stage">
+    <svg id="scene" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid meet" aria-label="책상 앞 캐릭터">
+      <!-- 배경 -->
+      <defs>
+        <linearGradient id="bgGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#2b2d52" />
+          <stop offset="100%" stop-color="#1a1b33" />
+        </linearGradient>
+        <linearGradient id="deskGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#6b4f3a" />
+          <stop offset="100%" stop-color="#4a3526" />
+        </linearGradient>
+        <!-- 책상 윗면(위에서 보는 시점) — 살짝 그라데이션으로 깊이감 -->
+        <linearGradient id="deskTopGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#8e6c4c" />
+          <stop offset="100%" stop-color="#74553c" />
+        </linearGradient>
+        <!-- 책상 윗면 아래 음각 그림자 -->
+        <linearGradient id="deskEdgeShadow" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="rgba(0,0,0,0.4)" />
+          <stop offset="100%" stop-color="rgba(0,0,0,0)" />
+        </linearGradient>
+        <!-- 마우스 본체 그라데이션 -->
+        <linearGradient id="mouseGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#f3f5f8" />
+          <stop offset="55%" stop-color="#dadee5" />
+          <stop offset="100%" stop-color="#a8aeb8" />
+        </linearGradient>
+        <!-- 마우스 버튼 (살짝 더 밝게, 본체와 미세 차이) -->
+        <linearGradient id="mouseBtnGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#f7f9fc" />
+          <stop offset="100%" stop-color="#c8cdd6" />
+        </linearGradient>
+        <radialGradient id="glow" cx="50%" cy="35%" r="60%">
+          <stop offset="0%" stop-color="#3a3d6e" />
+          <stop offset="100%" stop-color="#1a1b33" stop-opacity="0" />
+        </radialGradient>
+        <!-- 다리 영역(rect bbox)에 사진 한 장이 비율 무시하고 풀로 채워짐 -->
+        <!-- leg_texture.png: 알파 없이 강아지 곱슬털이 전체에 깔린 텍스처 -->
+        <pattern id="legTexture" patternUnits="objectBoundingBox" patternContentUnits="objectBoundingBox" width="1" height="1">
+          <image href="assets/leg_texture.png" x="0" y="0" width="1" height="1" preserveAspectRatio="none" />
+        </pattern>
+      </defs>
+
+      <g id="bg">
+        <rect x="0" y="0" width="800" height="600" fill="url(#bgGrad)" />
+        <rect x="0" y="0" width="800" height="600" fill="url(#glow)" />
+      </g>
+
+      <!-- ===== 캐릭터 사진 (책상에 의해 아랫부분이 가려짐) ===== -->
+      <image id="charImg" href="assets/character.png" x="275" y="200" width="300" height="350" preserveAspectRatio="xMidYMid meet" />
+
+      <!-- ===== 책상 (위에서 본 시점 — 윗면이 거의 전체, 앞쪽 얇은 옆면) ===== -->
+      <!-- 책상 앞쪽 옆면 (얇은 두께만 보임) -->
+      <rect x="110" y="580" width="580" height="20" fill="url(#deskGrad)" />
+      <!-- 책상 윗면 — 큰 사다리꼴: 위쪽 좁고 아래쪽 넓음 (위에서 살짝 내려다보는 원근) -->
+      <polygon points="200,455 600,455 690,580 110,580" fill="url(#deskTopGrad)" />
+      <!-- 윗면 뒤쪽 라인 미세 하이라이트 -->
+      <line x1="200" y1="455.5" x2="600" y2="455.5" stroke="rgba(255,255,255,0.22)" stroke-width="1" />
+      <!-- 윗면 앞쪽 가장자리 음각 그림자 (윗면-옆면 경계) -->
+      <rect x="110" y="578" width="580" height="5" fill="url(#deskEdgeShadow)" />
+
+      <!-- ===== 책상 위 액자 (장식 오브제) — 책상 윗면에 받침대로 놓인 모습 ===== -->
+      <g id="frame" transform="translate(560 428) rotate(-8 25 32.5)">
+        <!-- 책상에 떨어지는 그림자 -->
+        <rect x="2" y="3" width="50" height="65" fill="rgba(0,0,0,0.32)" rx="1.5" />
+        <!-- 액자 테두리 (다크 우드 톤) -->
+        <rect x="0" y="0" width="50" height="65" fill="#3a2a1c" stroke="#1a0e08" stroke-width="1.2" rx="1.5" />
+        <!-- 윗면 모서리 미세 하이라이트 -->
+        <rect x="0" y="0" width="50" height="1.5" fill="rgba(255,220,180,0.35)" rx="1.5" />
+        <!-- 매트(흰 여백) -->
+        <rect x="4" y="4" width="42" height="57" fill="#f3eee0" rx="0.5" />
+        <!-- 사진 (강아지) -->
+        <image href="assets/people.jpg" x="6" y="6" width="38" height="48" preserveAspectRatio="xMidYMid slice" />
+        <!-- 사진 안쪽 가장자리 그림자 -->
+        <rect x="6" y="6" width="38" height="48" fill="none" stroke="rgba(0,0,0,0.25)" stroke-width="0.5" />
+      </g>
+
+      <!-- 키보드 (강아지가 사용하는 방향 — 사용자 보기에 180° 뒤집힘) -->
+      <!-- 회전 중심은 키보드 로컬 영역(폭 230, 높이 95)의 가운데 -->
+      <g id="keyboard" transform="translate(195 482) rotate(185 115 47)">
+        <!-- 키보드 본체(베이스): 키 뒤에 깔림. 부드러운 모서리로 자연스럽게 -->
+        <rect class="kb-base-shadow" x="-8" y="-6" width="248" height="110" rx="12" />
+        <rect class="kb-base" x="-10" y="-10" width="248" height="110" rx="12" />
+        <rect class="kb-base-inset" x="-5" y="-5" width="238" height="100" rx="8" />
+      </g>
+
+      <!-- 마우스 (위치/회전은 JS가 갱신) -->
+      <g id="mouse">
+        <!-- 책상에 떨어지는 옅은 그림자 -->
+        <ellipse cx="0" cy="4" rx="20" ry="27" fill="rgba(0,0,0,0.22)" />
+        <!-- 본체 -->
+        <ellipse cx="0" cy="0" rx="18" ry="26" fill="url(#mouseGrad)" stroke="#7d848e" stroke-width="0.8" />
+        <!-- 좌/우 버튼 (마우스 윗부분 절반) -->
+        <path id="mouseBtnL" class="mouse-btn" d="M -18 -2 A 18 26 0 0 1 0 -26 L 0 -2 Z" fill="url(#mouseBtnGrad)" />
+        <path id="mouseBtnR" class="mouse-btn" d="M 0 -26 A 18 26 0 0 1 18 -2 L 0 -2 Z" fill="url(#mouseBtnGrad)" />
+        <!-- 가운데 구분선 (얇게) -->
+        <line x1="0" y1="-25" x2="0" y2="-3" stroke="#9aa1ab" stroke-width="0.7" />
+        <!-- 휠 -->
+        <rect id="mouseWheel" x="-2.5" y="-19" width="5" height="10" rx="2.5" fill="#7a818c" />
+      </g>
+
+      <!-- ===== 강아지 다리/발 (단순 SVG) ===== -->
+      <!-- 다리: rect를 회전해서 어깨 -> 손 방향으로. fill에 텍스처 패턴 -->
+      <!-- JS가 width(길이)와 transform(어깨 위치 + 회전 각도) 갱신 -->
+      <rect id="armL" x="0" y="-18" width="80" height="36" rx="18" fill="url(#legTexture)" stroke="#0a0a0a" stroke-width="0.8" />
+      <rect id="armR" x="0" y="-18" width="80" height="36" rx="18" fill="url(#legTexture)" stroke="#0a0a0a" stroke-width="0.8" />
+
+      <!-- 발: 사진(paw_only.png). 손 좌표 중심으로 배치, JS가 translate -->
+      <g id="handL">
+        <image href="assets/paw_only.png" x="-25" y="-16" width="50" height="33" preserveAspectRatio="xMidYMid meet" />
+      </g>
+      <g id="handR">
+        <image href="assets/paw_only.png" x="-25" y="-16" width="50" height="33" preserveAspectRatio="xMidYMid meet" />
+      </g>
+    </svg>
+  </div>
+
+  <script src="main.js"></script>
+</body>
+</html>
