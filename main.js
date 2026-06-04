@@ -188,9 +188,10 @@ if (electronAPI) {
   electronAPI.onInput((d) => {
     if (d.type === "move") handleMove(d.fx, d.fy);
     else if (d.type === "key") handleKey(d.char);
-    else if (d.type === "mousedown") handleMouseDown();
+    else if (d.type === "mousedown") handleMouseDown(d.button || 0);
     else if (d.type === "mouseup") handleMouseUp();
   });
+
 } else {
   window.addEventListener("mousemove", (e) =>
     handleMove(e.clientX / window.innerWidth, e.clientY / window.innerHeight)

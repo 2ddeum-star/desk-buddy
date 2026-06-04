@@ -1,4 +1,4 @@
-const { app, BrowserWindow, screen, globalShortcut, Tray, Menu, nativeImage } = require("electron");
+const { app, BrowserWindow, screen, globalShortcut, Tray, Menu, nativeImage, ipcMain } = require("electron");
 const path = require("path");
 const { uIOhook, UiohookKey } = require("uiohook-napi");
 
@@ -27,8 +27,8 @@ function send(data) {
 }
 
 // 마스코트 창 크기 (작게, 화면 전체를 덮지 않음)
-const WIN_W = 300;
-const WIN_H = 250;
+const WIN_W = 240;
+const WIN_H = 200;
 const MARGIN = 24;
 
 function createWindow() {
@@ -42,8 +42,8 @@ function createWindow() {
     transparent: true,
     frame: false,
     resizable: false,
-    movable: false,
-    focusable: false,
+    movable: true,
+    focusable: true,
     skipTaskbar: true,
     hasShadow: false,
     alwaysOnTop: true,
@@ -54,8 +54,7 @@ function createWindow() {
     },
   });
 
-  // 클릭이 아래 앱으로 통과되도록 (오버레이가 입력을 가로채지 않음)
-  win.setIgnoreMouseEvents(true, { forward: true });
+  // 마스코트 영역만 클릭/드래그 받음 (그 외 영역은 어차피 창 밖이라 아래 앱 정상 작동)
   win.setAlwaysOnTop(true, "screen-saver");
   win.loadFile("index.html");
 }
@@ -70,7 +69,11 @@ function startGlobalInput() {
     const fy = (e.y - bounds.y) / bounds.height;
     send({ type: "move", fx, fy });
   });
-  uIOhook.on("mousedown", () => send({ type: "mousedown" }));
+  uIOhook.on("mousedown", (e) => {
+    // uiohook 1=Left, 2=Right → DOM e.button (0=L, 2=R)
+    const button = e.button === 2 ? 2 : e.button === 3 ? 1 : 0;
+    send({ type: "mousedown", button });
+  });
   uIOhook.on("mouseup", () => send({ type: "mouseup" }));
   uIOhook.on("keydown", (e) => {
     send({ type: "key", char: code2char[e.keycode] || null });
@@ -99,6 +102,19 @@ app.whenReady().then(() => {
   createWindow();
   startGlobalInput();
   createTray();
+
+  // 컨트롤 바 hover 시 클릭/드래그 받도록 토글
+  ipcMain.on("set-mouse-enabled", (_event, enabled) => {
+    if (!win || win.isDestroyed()) return;
+    if (enabled) {
+      win.setIgnoreMouseEvents(false);
+    } else {
+      win.setIgnoreMouseEvents(true, { forward: true });
+    }
+  });
+
+  // 닫기 버튼 클릭 → 앱 종료
+  ipcMain.on("quit-app", () => app.quit());
 
   // 오버레이 창은 포커스를 받지 않으므로 전역 단축키로 종료
   globalShortcut.register("CommandOrControl+Shift+Q", () => app.quit());
