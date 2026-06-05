@@ -17,12 +17,12 @@ const mouseBtnR = document.getElementById("mouseBtnR");
 
 // 어깨(=다리 시작점) — 몸통(사진 가슴) 쪽으로 더 올림 + 다리도 길어짐
 const shoulderL = { x: 370, y: 438 };
-const shoulderR = { x: 430, y: 438 };
+const shoulderR = { x: 445, y: 438 }; // 우측 팔 약간 우측으로 (양손 모드에서 자연스럽게)
 
 // 캐릭터 사진 살짝 기울임 — 좌측 잘린 부분이 덜 거슬리게
-// index.html 의 charImg 위치(x=275 y=200 w=300 h=327) 기준 사진 중심
+// index.html 의 charImg 위치(x=245 y=150 w=400 h=450) 기준 사진 중심
 const CHAR_ROT_DEG = -5;
-const CHAR_CENTER = { x: 425, y: 363.5 };
+const CHAR_CENTER = { x: 445, y: 375 };
 
 // 어깨가 손 쪽으로 살짝 따라감 — 손 멀리 뻗어도 다리가 과하게 길어지지 않음
 const SHOULDER_FOLLOW_X = 0.35;
@@ -57,7 +57,7 @@ function rotateAround(px, py, cx, cy, deg) {
 
 // ---- 키보드 생성 ----
 const KB = {
-  gx: 205, gy: 463,
+  gx: 170, gy: 463,
   u: 17,         // 1u 키 폭
   kh: 12,        // 메인 키 높이
   gapx: 1.5,
@@ -198,17 +198,28 @@ ARROW_KEYS.forEach((key) => {
 });
 
 // ---- 상태 ----
-// 키보드가 커진 만큼 마우스도 책상 우측으로 이동 (충돌 방지)
-let deskMouse = { x: 588, y: 524 };
-const mouseRange = { x: [560, 615], y: [512, 547] };
+// 키보드와 함께 좌측으로 이동 — 마우스 잡은 팔(오른쪽) 길이 줄임
+let deskMouse = { x: 555, y: 524 };
+const mouseRange = { x: [528, 580], y: [512, 547] };
 
-const leftHome = (keyMap["f"] && keyMap["f"][0]) || { cx: 360, cy: 540 };
+// 키보드는 강아지 시점(180° 회전)이라 화면상 좌/우가 일반 키보드와 반대.
+// → 화면 좌측 손(handL)이 갈 home 은 회전 후 화면 좌측에 있는 J(강아지 우손 검지),
+//   화면 우측 손(handR)이 갈 home 은 회전 후 화면 우측에 있는 F(강아지 좌손 검지).
+// 이렇게 두면 어깨 → 손 방향이 자연스럽게 같은 쪽으로 뻗어 팔이 교차되지 않음.
+const leftHome = (keyMap["j"] && keyMap["j"][0]) || { cx: 360, cy: 540 };
+// 오른손 home — F 키 위치에서 살짝 우측 offset (어깨 우측 이동에 맞춰 팔 평행 이동)
+const rightHomeKey = (keyMap["f"] && keyMap["f"][0]) || { cx: 400, cy: 540 };
+const rightHome = { cx: rightHomeKey.cx + 15, cy: rightHomeKey.cy };
 let handL = { x: leftHome.cx, y: leftHome.cy };
 let handR = { x: deskMouse.x, y: deskMouse.y - 8 };
 
 let leftTap = { time: -9999, cx: 0, cy: 0 };
 let rightTap = { time: -9999, cx: 0, cy: 0 };
 const TAP_MS = 180;
+
+// 마우스가 일정 시간 안 움직이면 오른손도 키보드 모드로 (양손 타이핑)
+const MOUSE_IDLE_MS = 1500;
+let lastMouseMove = performance.now(); // 디폴트는 마우스 잡고 있는 상태 — idle 까지 1.5초 대기
 
 let mouseDown = false;
 let headBobTime = -9999;
@@ -228,11 +239,13 @@ function handleMove(fx, fy) {
   fy = clamp(fy, 0, 1);
   deskMouse.x = lerp(mouseRange.x[0], mouseRange.x[1], fx);
   deskMouse.y = lerp(mouseRange.y[0], mouseRange.y[1], fy);
+  lastMouseMove = performance.now();
   activity();
 }
 
 function handleMouseDown(button = 0) {
   mouseDown = true;
+  lastMouseMove = performance.now(); // 클릭도 마우스 활동으로 간주
   headBobTime = performance.now();
   // 강아지 시점에 맞춤: 마우스가 180° 회전이라 사용자 좌클릭은 화면 좌측의 버튼(=강아지 우측 = mouseBtnR) 빛남
   flashMouseBtn(button === 2 ? mouseBtnL : mouseBtnR);
@@ -272,9 +285,17 @@ function handleKey(char) {
     setTimeout(() => t.el.classList.remove("active"), 130);
   });
 
-  // 키보드는 항상 왼발로 타이핑 (오른발은 마우스 전담) — 첫 번째(좌측) 키 위치 사용
   const target = targets[0];
-  leftTap = { time: now, cx: target.cx, cy: target.cy };
+  // 마우스 idle 시 양손 모드: 키 위치(화면상 cx)에 따라 가까운 손이 타이핑
+  // 마우스 활성 시: 왼손만 타이핑 (오른손은 마우스 전담)
+  const mouseIdle = now - lastMouseMove > MOUSE_IDLE_MS;
+  // 분기 기준은 키보드 가운데 근처 고정값 — 어깨 위치를 옮겨도 분기 일관성 유지
+  const handSplitX = 400;
+  if (mouseIdle && target.cx > handSplitX) {
+    rightTap = { time: now, cx: target.cx, cy: target.cy };
+  } else {
+    leftTap = { time: now, cx: target.cx, cy: target.cy };
+  }
 }
 
 // 입력 소스 연결: Electron(전역 입력)이 있으면 그쪽을, 없으면 브라우저 DOM 이벤트를 사용
@@ -326,11 +347,18 @@ function frame() {
     lty = leftHome.cy;
   }
 
-  // 오른손 목표: 기본은 마우스 윗부분(버튼) 위, 클릭 시 살짝 누름
+  // 오른손 목표 (3가지 상태):
+  //  1) 키보드 타이핑 중 (양손 모드)
+  //  2) 마우스 idle — 키보드 home(J 키) 위에 대기
+  //  3) 마우스 활성 — 마우스 위
+  const mouseIdleNow = now - lastMouseMove > MOUSE_IDLE_MS;
   let rtx, rty;
   if (now - rightTap.time < TAP_MS) {
     rtx = rightTap.cx;
     rty = rightTap.cy + 3;
+  } else if (mouseIdleNow) {
+    rtx = rightHome.cx;
+    rty = rightHome.cy;
   } else {
     rtx = deskMouse.x;
     rty = deskMouse.y - 16 + (mouseDown ? 4 : 0); // 발이 마우스를 덜 가리게 위로 띄움

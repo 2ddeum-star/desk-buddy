@@ -1,6 +1,6 @@
 {
   "name": "desk-buddy",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "OS 전역 마우스/키보드 입력을 따라 동작하는 데스크톱 마스코트 (Electron)",
   "main": "electron-main.js",
   "scripts": {

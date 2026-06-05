@@ -57,17 +57,17 @@
       </g>
 
       <!-- ===== 캐릭터 사진 (책상에 의해 아랫부분이 가려짐) ===== -->
-      <image id="charImg" href="assets/character.png" x="275" y="200" width="300" height="350" preserveAspectRatio="xMidYMid meet" />
+      <image id="charImg" href="assets/character.png" x="245" y="135" width="400" height="450" preserveAspectRatio="xMidYMid meet" />
 
       <!-- ===== 책상 (위에서 본 시점 — 윗면이 거의 전체, 앞쪽 얇은 옆면) ===== -->
-      <!-- 책상 앞쪽 옆면 (얇은 두께만 보임) -->
-      <rect x="110" y="580" width="580" height="20" fill="url(#deskGrad)" />
-      <!-- 책상 윗면 — 큰 사다리꼴: 위쪽 좁고 아래쪽 넓음 (위에서 살짝 내려다보는 원근) -->
-      <polygon points="200,455 600,455 690,580 110,580" fill="url(#deskTopGrad)" />
+      <!-- 책상 앞쪽 옆면 (얇은 두께만 보임) — 좌측 40 확장 -->
+      <rect x="70" y="580" width="620" height="20" fill="url(#deskGrad)" />
+      <!-- 책상 윗면 — 큰 사다리꼴: 좌측 40 확장 (캐릭터 좌측 손/팔이 책상 위에 자연스럽게) -->
+      <polygon points="160,455 600,455 690,580 70,580" fill="url(#deskTopGrad)" />
       <!-- 윗면 뒤쪽 라인 미세 하이라이트 -->
-      <line x1="200" y1="455.5" x2="600" y2="455.5" stroke="rgba(255,255,255,0.22)" stroke-width="1" />
+      <line x1="160" y1="455.5" x2="600" y2="455.5" stroke="rgba(255,255,255,0.22)" stroke-width="1" />
       <!-- 윗면 앞쪽 가장자리 음각 그림자 (윗면-옆면 경계) -->
-      <rect x="110" y="578" width="580" height="5" fill="url(#deskEdgeShadow)" />
+      <rect x="70" y="578" width="620" height="5" fill="url(#deskEdgeShadow)" />
 
       <!-- ===== 책상 위 액자 (장식 오브제) — 책상 윗면에 받침대로 놓인 모습 ===== -->
       <g id="frame" transform="translate(560 428) rotate(-8 25 32.5)">
@@ -87,7 +87,7 @@
 
       <!-- 키보드 (강아지가 사용하는 방향 — 사용자 보기에 180° 뒤집힘) -->
       <!-- 회전 중심은 키보드 로컬 영역의 가운데(본체 박스 중심) -->
-      <g id="keyboard" transform="translate(205 463) rotate(185 163 39)">
+      <g id="keyboard" transform="translate(180 463) rotate(180 163 39)">
         <!-- 키보드 본체(베이스): 키 뒤에 깔림. 부드러운 모서리로 자연스럽게 -->
         <rect class="kb-base-shadow" x="-3" y="-1" width="336" height="88" rx="11" />
         <rect class="kb-base" x="-5" y="-5" width="336" height="88" rx="11" />
