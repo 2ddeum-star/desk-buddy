@@ -57,7 +57,8 @@
       </g>
 
       <!-- ===== 캐릭터 사진 (책상에 의해 아랫부분이 가려짐) ===== -->
-      <image id="charImg" href="assets/character.png" x="245" y="135" width="400" height="450" preserveAspectRatio="xMidYMid meet" />
+      <!-- x/y/width/height 는 character-config.js 의 charImg 설정대로 main.js 가 갱신 -->
+      <image id="charImg" href="assets/character.png" preserveAspectRatio="xMidYMid meet" />
 
       <!-- ===== 책상 (위에서 본 시점 — 윗면이 거의 전체, 앞쪽 얇은 옆면) ===== -->
       <!-- 책상 앞쪽 옆면 (얇은 두께만 보임) — 좌측 40 확장 -->
@@ -125,6 +126,8 @@
     </svg>
   </div>
 
+  <!-- 활성 캐릭터 설정 — build-character.js 가 빌드 직전 갱신 -->
+  <script src="character-config.js"></script>
   <script src="main.js"></script>
 </body>
 </html>

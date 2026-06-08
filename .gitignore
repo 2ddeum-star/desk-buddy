@@ -5,3 +5,6 @@ release/
 *.log
 .DS_Store
 Thumbs.db
+
+# 사적 캐릭터 자산 — public repo 노출 방지
+characters/pk/

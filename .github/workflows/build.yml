@@ -31,6 +31,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # 활성 캐릭터의 자산을 assets/ 와 character-config.js 로 복사
+      # (활성 캐릭터는 package.json 의 "deskBuddy.activeCharacter" 또는 CHARACTER 환경변수)
+      - name: Stage active character
+        run: node build-character.js
+
       - name: Build (electron-builder)
         run: npx electron-builder --publish=never
         env:

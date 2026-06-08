@@ -23,9 +23,20 @@ for (const [name, code] of Object.entries(UiohookKey)) {
   else if (name === "ArrowDown") mapped = "arrowdown";
   else if (name === "ArrowLeft") mapped = "arrowleft";
   else if (name === "ArrowRight") mapped = "arrowright";
-  else if (/^Shift/.test(name)) mapped = "shift";
-  else if (/^(Ctrl|Control)/.test(name)) mapped = "control";
-  else if (/^Alt/.test(name)) mapped = "alt";
+  // Ctrl/Shift/Alt 좌/우 분리. Meta 만 통합.
+  // 정확 매칭 먼저 (uiohook-napi enum: Ctrl/CtrlRight, Shift/ShiftRight, Alt/AltRight)
+  else if (name === "ShiftRight") mapped = "shift_r";
+  else if (name === "Shift") mapped = "shift_l";
+  else if (name === "AltRight") mapped = "alt_r";
+  else if (name === "Alt") mapped = "alt_l";
+  else if (name === "CtrlLeft" || name === "ControlLeft" || name === "Ctrl") mapped = "control_l";
+  else if (name === "CtrlRight" || name === "ControlRight") mapped = "control_r";
+  // fallback (위에서 안 잡힌 변종 이름)
+  else if (/Right$/.test(name) && /^Shift/.test(name)) mapped = "shift_r";
+  else if (/^Shift/.test(name)) mapped = "shift_l";
+  else if (/Right$/.test(name) && /^Alt/.test(name)) mapped = "alt_r";
+  else if (/^Alt/.test(name)) mapped = "alt_l";
+  else if (/^(Ctrl|Control)/.test(name)) mapped = "control_l";
   else if (/^Meta/.test(name)) mapped = "meta";
   else if (name === "Minus") mapped = "-";
   else if (name === "Equal") mapped = "=";
@@ -40,6 +51,15 @@ for (const [name, code] of Object.entries(UiohookKey)) {
   else if (name === "Backquote" || name === "Grave") mapped = "`";
   if (mapped) code2char[code] = mapped;
 }
+
+// 한국식 키보드 보정 — uiohook-napi enum 에 없는 키코드.
+// 한자 키 위치(우측 Ctrl 자리) → control_r
+// 한/영 키 위치(우측 Alt 자리) → alt_r
+// keycode 는 키보드/드라이버 마다 달라서 알려진 후보를 모두 매핑.
+const KR_CTRL_R_CODES = [121];      // 한자 키 (0x79)
+const KR_ALT_R_CODES = [112, 114];  // 한/영 키 (0x70, 0x72)
+for (const c of KR_CTRL_R_CODES) if (!(c in code2char)) code2char[c] = "control_r";
+for (const c of KR_ALT_R_CODES) if (!(c in code2char)) code2char[c] = "alt_r";
 
 // 화면 정규화용 (전역 좌표 -> 0~1 비율)
 let bounds = { x: 0, y: 0, width: 1920, height: 1080 };

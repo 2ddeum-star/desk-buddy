@@ -1,13 +1,21 @@
 {
   "name": "desk-buddy",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "OS 전역 마우스/키보드 입력을 따라 동작하는 데스크톱 마스코트 (Electron)",
   "main": "electron-main.js",
   "scripts": {
+    "prestart": "node build-character.js",
     "start": "electron .",
+    "build:character": "node build-character.js",
+    "predist": "node build-character.js",
     "dist": "electron-builder",
+    "predist:win": "node build-character.js",
     "dist:win": "electron-builder --win",
+    "predist:mac": "node build-character.js",
     "dist:mac": "electron-builder --mac"
+  },
+  "deskBuddy": {
+    "activeCharacter": "poodle"
   },
   "author": "",
   "license": "MIT",
@@ -27,6 +35,7 @@
       "main.js",
       "electron-main.js",
       "preload.js",
+      "character-config.js",
       "assets/**"
     ],
     "win": {

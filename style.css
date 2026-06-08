@@ -160,3 +160,11 @@ body.electron .hint {
 .mouse-btn.flash {
   fill: #ffd166;
 }
+
+/* 마우스 드래그(좌/우 버튼 누른 상태) — 휠에만 노란 컬러 점등 */
+#mouseWheel {
+  transition: fill 0.15s ease;
+}
+#mouse.dragging #mouseWheel {
+  fill: #ffd166;
+}

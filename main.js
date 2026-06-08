@@ -15,14 +15,79 @@ const handREl = document.getElementById("handR");
 const mouseBtnL = document.getElementById("mouseBtnL");
 const mouseBtnR = document.getElementById("mouseBtnR");
 
-// 어깨(=다리 시작점) — 몸통(사진 가슴) 쪽으로 더 올림 + 다리도 길어짐
-const shoulderL = { x: 370, y: 438 };
-const shoulderR = { x: 445, y: 438 }; // 우측 팔 약간 우측으로 (양손 모드에서 자연스럽게)
+// 활성 캐릭터 설정 — character-config.js 가 window.CHARACTER_CONFIG 를 정의.
+// 파일이 없거나 누락 필드가 있을 때를 대비한 fallback (poodle 기본값).
+const CFG = Object.assign(
+  {
+    charImg: { x: 245, y: 135, width: 400, height: 450 },
+    charRot: -5,
+    charCenter: { x: 445, y: 375 },
+    shoulderL: { x: 370, y: 438 },
+    shoulderR: { x: 445, y: 438 },
+    armFill: "texture",   // "texture" = leg_texture.png 패턴, 또는 "#ffffff" 같은 색 코드
+    pawFill: "image",     // "image" = paw_only.png, 또는 "#ffffff" 같은 색 코드(SVG 발 모양)
+    showFrame: true,      // 책상 위 액자 표시 여부
+  },
+  window.CHARACTER_CONFIG || {}
+);
 
-// 캐릭터 사진 살짝 기울임 — 좌측 잘린 부분이 덜 거슬리게
-// index.html 의 charImg 위치(x=245 y=150 w=400 h=450) 기준 사진 중심
-const CHAR_ROT_DEG = -5;
-const CHAR_CENTER = { x: 445, y: 375 };
+// 캐릭터 이미지 위치는 config 에 따라 즉시 갱신
+if (charImg) {
+  charImg.setAttribute("x", CFG.charImg.x);
+  charImg.setAttribute("y", CFG.charImg.y);
+  charImg.setAttribute("width", CFG.charImg.width);
+  charImg.setAttribute("height", CFG.charImg.height);
+}
+
+// 팔 fill — "texture" 면 leg_texture.png 패턴, 그 외엔 색 코드 (예: "#ffffff")
+const armFillValue = CFG.armFill === "texture" ? "url(#legTexture)" : CFG.armFill;
+if (armLEl) armLEl.setAttribute("fill", armFillValue);
+if (armREl) armREl.setAttribute("fill", armFillValue);
+
+// 발 — "image" 면 paw_only.png 그대로, 그 외엔 SVG 도형(발바닥 + 발가락 4개)으로 교체
+if (CFG.pawFill && CFG.pawFill !== "image") {
+  const SVG_NS = "http://www.w3.org/2000/svg";
+  const PAW_PARTS = [
+    // 발바닥 (큰 타원)
+    { cx: 0, cy: 5, rx: 14, ry: 10 },
+    // 발가락 4개 (위쪽 호 따라 배치)
+    { cx: -10, cy: -8, rx: 4.5, ry: 5.5 },
+    { cx: -3.5, cy: -12, rx: 4, ry: 5 },
+    { cx: 3.5, cy: -12, rx: 4, ry: 5 },
+    { cx: 10, cy: -8, rx: 4.5, ry: 5.5 },
+  ];
+  function drawPaw(g) {
+    if (!g) return;
+    while (g.firstChild) g.removeChild(g.firstChild);
+    PAW_PARTS.forEach((p) => {
+      const e = document.createElementNS(SVG_NS, "ellipse");
+      e.setAttribute("cx", p.cx);
+      e.setAttribute("cy", p.cy);
+      e.setAttribute("rx", p.rx);
+      e.setAttribute("ry", p.ry);
+      e.setAttribute("fill", CFG.pawFill);
+      e.setAttribute("stroke", "#0a0a0a");
+      e.setAttribute("stroke-width", "0.8");
+      g.appendChild(e);
+    });
+  }
+  drawPaw(handLEl);
+  drawPaw(handREl);
+}
+
+// 액자 — showFrame: false 면 숨김
+if (CFG.showFrame === false) {
+  const frameEl = document.getElementById("frame");
+  if (frameEl) frameEl.style.display = "none";
+}
+
+// 어깨(=다리 시작점) — 캐릭터 사진 가슴 부근. shoulderL = 화면 좌측, shoulderR = 화면 우측.
+const shoulderL = CFG.shoulderL;
+const shoulderR = CFG.shoulderR;
+
+// 캐릭터 사진 회전 — 살짝 기울이기. 회전 중심은 charCenter (사진 중심에 가깝게).
+const CHAR_ROT_DEG = CFG.charRot;
+const CHAR_CENTER = CFG.charCenter;
 
 // 어깨가 손 쪽으로 살짝 따라감 — 손 멀리 뻗어도 다리가 과하게 길어지지 않음
 const SHOULDER_FOLLOW_X = 0.35;
@@ -104,22 +169,23 @@ const MAIN_ROWS = [
     { label: ";", k: ";" }, { label: "'", k: "'" },
     { label: "Enter", k: "enter", w: 1.8 },
   ],
-  [ // Shift + ZXCV + Shift 행
-    { label: "Shift", k: "shift", w: 2.2 },
+  [ // Shift + ZXCV + Shift 행 — 좌/우 분리
+    // 회전 후 첫 번째(로컬 좌측) 키는 화면 우측에 보임 → "_r", 마지막 키는 화면 좌측 → "_l"
+    { label: "Shift", k: "shift_r", w: 2.2 },
     { label: "Z", k: "z" }, { label: "X", k: "x" }, { label: "C", k: "c" },
     { label: "V", k: "v" }, { label: "B", k: "b" }, { label: "N", k: "n" },
     { label: "M", k: "m" }, { label: ",", k: "," }, { label: ".", k: "." },
-    { label: "/", k: "/" }, { label: "Shift", k: "shift", w: 2.3 },
+    { label: "/", k: "/" }, { label: "Shift", k: "shift_l", w: 2.3 },
   ],
-  [ // Ctrl Win Alt Space Alt Win Fn Ctrl
-    { label: "Ctrl", k: "control", w: 1.5 },
+  [ // Ctrl/Alt 좌/우 분리, Win 은 통합
+    { label: "Ctrl", k: "control_r", w: 1.5 },
     { label: "Win", k: "meta", w: 1.2 },
-    { label: "Alt", k: "alt", w: 1.2 },
+    { label: "Alt", k: "alt_r", w: 1.2 },
     { label: "", k: " ", w: 5.7 },
-    { label: "Alt", k: "alt", w: 1.2 },
+    { label: "Alt", k: "alt_l", w: 1.2 },
     { label: "Win", k: "meta", w: 1.2 },
     { label: "Fn", k: "fn", w: 1 },
-    { label: "Ctrl", k: "control", w: 1.5 },
+    { label: "Ctrl", k: "control_l", w: 1.5 },
   ],
 ];
 
@@ -247,11 +313,14 @@ function handleMouseDown(button = 0) {
   mouseDown = true;
   lastMouseMove = performance.now(); // 클릭도 마우스 활동으로 간주
   headBobTime = performance.now();
+  // 마우스 본체에 드래그 글로우 효과
+  mouseG.classList.add("dragging");
   // 강아지 시점에 맞춤: 마우스가 180° 회전이라 사용자 좌클릭은 화면 좌측의 버튼(=강아지 우측 = mouseBtnR) 빛남
   flashMouseBtn(button === 2 ? mouseBtnL : mouseBtnR);
 }
 function handleMouseUp() {
   mouseDown = false;
+  mouseG.classList.remove("dragging");
 }
 
 function flashMouseBtn(el) {
@@ -260,22 +329,28 @@ function flashMouseBtn(el) {
   setTimeout(() => el.classList.remove("flash"), 200);
 }
 
-function normalizeKey(rawKey) {
+function normalizeKey(rawKey, code) {
   if (rawKey == null) return null;
   const k = String(rawKey);
+  // Control/Shift/Alt 좌/우 분리 (KeyboardEvent.code 기반). Meta 는 통합.
+  if (code) {
+    if (k === "Control") return code === "ControlRight" ? "control_r" : "control_l";
+    if (k === "Shift")   return code === "ShiftRight"   ? "shift_r"   : "shift_l";
+    if (k === "Alt")     return code === "AltRight"     ? "alt_r"     : "alt_l";
+  }
   if (k.length === 1) return k.toLowerCase();
   if (k.toLowerCase() === "space") return " ";
-  // "ArrowUp"→"arrowup", "F1"→"f1", "Shift"/"Control"/"Alt"/"Meta",
-  // "Escape"/"Tab"/"Enter"/"Backspace"/"CapsLock" 모두 그대로 소문자화
+  // "ArrowUp"→"arrowup", "F1"→"f1", "Meta", "Escape"/"Tab"/...
+  // Electron 모드의 "control_l"/"shift_r"/"alt_r" 등도 그대로 통과
   return k.toLowerCase();
 }
 
-function handleKey(char) {
+function handleKey(char, code) {
   activity();
   const now = performance.now();
   headBobTime = now;
 
-  const norm = normalizeKey(char);
+  const norm = normalizeKey(char, code);
   const targets = norm && keyMap[norm];
   if (!targets || !targets.length) return;
 
@@ -322,7 +397,7 @@ if (electronAPI) {
   window.addEventListener("contextmenu", (e) => e.preventDefault());
   window.addEventListener("keydown", (e) => {
     if (e.repeat) return;
-    handleKey(e.key);
+    handleKey(e.key, e.code); // e.code 로 좌/우 modifier 구분
   });
 }
 
