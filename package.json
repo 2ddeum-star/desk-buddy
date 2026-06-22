@@ -1,6 +1,6 @@
 {
   "name": "desk-buddy",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "OS 전역 마우스/키보드 입력을 따라 동작하는 데스크톱 마스코트 (Electron)",
   "main": "electron-main.js",
   "scripts": {
@@ -20,7 +20,7 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "electron": "^33.2.0",
+    "electron": "^32.2.0",
     "electron-builder": "^25.1.8"
   },
   "dependencies": {
@@ -39,16 +39,25 @@
       "assets/**"
     ],
     "win": {
-      "target": "nsis",
+      "target": ["nsis", "portable"],
       "icon": "build/icon.png"
+    },
+    "portable": {
+      "artifactName": "Desk-Buddy-${version}-portable.exe"
     },
     "mac": {
       "target": "dmg",
       "icon": "build/icon.png",
       "category": "public.app-category.utilities"
     },
+    "nsis": {
+      "differentialPackage": false
+    },
+    "compression": "maximum",
+    "electronLanguages": ["ko", "en-US"],
     "asarUnpack": [
       "**/node_modules/uiohook-napi/**"
-    ]
+    ],
+    "npmRebuild": false
   }
 }

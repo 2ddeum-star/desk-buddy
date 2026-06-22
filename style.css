@@ -69,7 +69,6 @@ body.electron #scene {
   width: 100%;
   height: 100%;
   max-width: none;
-  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.45));
 }
 
 body.electron .hint {
@@ -143,13 +142,13 @@ body.electron .hint {
   fill: #2b2118;
 }
 
-/* 다리: 몸통과 비슷한 어두운 톤 유지 (살짝만 밝게) */
+/* 다리: 몸통 텍스처 그대로 — 캐릭터별 톤 유지 위해 보정 최소화 */
 #armL, #armR {
-  filter: brightness(1.08) saturate(0.95);
+  filter: brightness(1.05);
 }
-/* 발: 책상 위에서 잘 보이도록 좀 더 밝게 */
+/* 발: paw_only.png 자체가 흰 발 사진 → CSS 필터 없이 자연 색감 유지 */
 #handL, #handR {
-  filter: brightness(1.35) saturate(0.95);
+  filter: none;
 }
 
 /* 마우스 좌/우 버튼: 클릭 시 잠깐 빛남 */

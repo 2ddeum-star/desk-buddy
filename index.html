@@ -61,9 +61,9 @@
       <image id="charImg" href="assets/character.png" preserveAspectRatio="xMidYMid meet" />
 
       <!-- ===== 책상 (위에서 본 시점 — 윗면이 거의 전체, 앞쪽 얇은 옆면) ===== -->
-      <!-- 책상 앞쪽 옆면 (얇은 두께만 보임) — 좌측 40 확장 -->
+      <!-- 책상 앞쪽 옆면 (얇은 두께만 보임) -->
       <rect x="70" y="580" width="620" height="20" fill="url(#deskGrad)" />
-      <!-- 책상 윗면 — 큰 사다리꼴: 좌측 40 확장 (캐릭터 좌측 손/팔이 책상 위에 자연스럽게) -->
+      <!-- 책상 윗면 — 큰 사다리꼴 -->
       <polygon points="160,455 600,455 690,580 70,580" fill="url(#deskTopGrad)" />
       <!-- 윗면 뒤쪽 라인 미세 하이라이트 -->
       <line x1="160" y1="455.5" x2="600" y2="455.5" stroke="rgba(255,255,255,0.22)" stroke-width="1" />
@@ -88,11 +88,11 @@
 
       <!-- 키보드 (강아지가 사용하는 방향 — 사용자 보기에 180° 뒤집힘) -->
       <!-- 회전 중심은 키보드 로컬 영역의 가운데(본체 박스 중심) -->
-      <g id="keyboard" transform="translate(180 463) rotate(180 163 39)">
+      <g id="keyboard" transform="translate(165 458) rotate(180 182 48)">
         <!-- 키보드 본체(베이스): 키 뒤에 깔림. 부드러운 모서리로 자연스럽게 -->
-        <rect class="kb-base-shadow" x="-3" y="-1" width="336" height="88" rx="11" />
-        <rect class="kb-base" x="-5" y="-5" width="336" height="88" rx="11" />
-        <rect class="kb-base-inset" x="0" y="0" width="326" height="80" rx="8" />
+        <rect class="kb-base-shadow" x="-3" y="-1" width="375" height="106" rx="13" />
+        <rect class="kb-base" x="-5" y="-5" width="375" height="106" rx="13" />
+        <rect class="kb-base-inset" x="0" y="0" width="365" height="98" rx="10" />
       </g>
 
       <!-- 마우스 (위치/회전은 JS가 갱신) -->
@@ -111,17 +111,18 @@
       </g>
 
       <!-- ===== 강아지 다리/발 (단순 SVG) ===== -->
-      <!-- 다리: rect를 회전해서 어깨 -> 손 방향으로. fill에 텍스처 패턴 -->
-      <!-- JS가 width(길이)와 transform(어깨 위치 + 회전 각도) 갱신 -->
-      <rect id="armL" x="0" y="-18" width="80" height="36" rx="18" fill="url(#legTexture)" stroke="#0a0a0a" stroke-width="0.8" />
-      <rect id="armR" x="0" y="-18" width="80" height="36" rx="18" fill="url(#legTexture)" stroke="#0a0a0a" stroke-width="0.8" />
+      <!-- 다리: rect를 회전해서 어깨 -> 손 방향으로. fill에 텍스처 패턴 (라인 없음) -->
+      <!-- 두께(height) 55 — 손과 두께 차이 줄여 자연 연결. rx 도 같이 키워서 둥근 끝 -->
+      <rect id="armL" x="0" y="-27.5" width="80" height="55" rx="27.5" fill="url(#legTexture)" />
+      <rect id="armR" x="0" y="-27.5" width="80" height="55" rx="27.5" fill="url(#legTexture)" />
 
       <!-- 발: 사진(paw_only.png). 손 좌표 중심으로 배치, JS가 translate -->
+      <!-- 영역 75×75 — 충분히 크게, paw 정사각형(1:1) 비율 -->
       <g id="handL">
-        <image href="assets/paw_only.png" x="-25" y="-16" width="50" height="33" preserveAspectRatio="xMidYMid meet" />
+        <image href="assets/paw_only.png" x="-37.5" y="-37.5" width="75" height="75" preserveAspectRatio="xMidYMid meet" />
       </g>
       <g id="handR">
-        <image href="assets/paw_only.png" x="-25" y="-16" width="50" height="33" preserveAspectRatio="xMidYMid meet" />
+        <image href="assets/paw_only.png" x="-37.5" y="-37.5" width="75" height="75" preserveAspectRatio="xMidYMid meet" />
       </g>
     </svg>
   </div>

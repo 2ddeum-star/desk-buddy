@@ -27,6 +27,7 @@ const CFG = Object.assign(
     armFill: "texture",   // "texture" = leg_texture.png 패턴, 또는 "#ffffff" 같은 색 코드
     pawFill: "image",     // "image" = paw_only.png, 또는 "#ffffff" 같은 색 코드(SVG 발 모양)
     showFrame: true,      // 책상 위 액자 표시 여부
+    armThickness: 44,     // 팔 두께(px, viewBox 단위). 캐릭터별 비율에 맞춰 조정
   },
   window.CHARACTER_CONFIG || {}
 );
@@ -44,18 +45,23 @@ const armFillValue = CFG.armFill === "texture" ? "url(#legTexture)" : CFG.armFil
 if (armLEl) armLEl.setAttribute("fill", armFillValue);
 if (armREl) armREl.setAttribute("fill", armFillValue);
 
-// 발 — "image" 면 paw_only.png 그대로, 그 외엔 SVG 도형(발바닥 + 발가락 4개)으로 교체
+// 팔 두께 — 캐릭터별 설정. height/y/rx 모두 두께 기준으로 일관 적용 (반원 끝).
+const armH = CFG.armThickness;
+for (const el of [armLEl, armREl]) {
+  if (!el) continue;
+  el.setAttribute("height", armH);
+  el.setAttribute("y", -armH / 2);
+  el.setAttribute("rx", armH / 2);
+}
+
+// 발 — "image" 면 paw_only.png 그대로, "texture" 면 leg_texture.png 패턴, 그 외엔 색 코드
 if (CFG.pawFill && CFG.pawFill !== "image") {
   const SVG_NS = "http://www.w3.org/2000/svg";
+  // 손 영역(75×75) 에 맞춰 크게 — 발가락 없이 큰 타원 하나만 (민짜)
   const PAW_PARTS = [
-    // 발바닥 (큰 타원)
-    { cx: 0, cy: 5, rx: 14, ry: 10 },
-    // 발가락 4개 (위쪽 호 따라 배치)
-    { cx: -10, cy: -8, rx: 4.5, ry: 5.5 },
-    { cx: -3.5, cy: -12, rx: 4, ry: 5 },
-    { cx: 3.5, cy: -12, rx: 4, ry: 5 },
-    { cx: 10, cy: -8, rx: 4.5, ry: 5.5 },
+    { cx: 0, cy: 0, rx: 30, ry: 26 },
   ];
+  const pawFillValue = CFG.pawFill === "texture" ? "url(#legTexture)" : CFG.pawFill;
   function drawPaw(g) {
     if (!g) return;
     while (g.firstChild) g.removeChild(g.firstChild);
@@ -65,9 +71,7 @@ if (CFG.pawFill && CFG.pawFill !== "image") {
       e.setAttribute("cy", p.cy);
       e.setAttribute("rx", p.rx);
       e.setAttribute("ry", p.ry);
-      e.setAttribute("fill", CFG.pawFill);
-      e.setAttribute("stroke", "#0a0a0a");
-      e.setAttribute("stroke-width", "0.8");
+      e.setAttribute("fill", pawFillValue);
       g.appendChild(e);
     });
   }
@@ -109,7 +113,7 @@ function toSvg(clientX, clientY) {
 // ---- 키보드/마우스 회전 (강아지가 사용하는 방향, 살짝 비스듬) ----
 // index.html 의 keyboard transform="rotate(185 115 47)" 와 일치해야 함
 const VIEW_ROT_DEG = 185;
-const KB_PIVOT = { x: 163, y: 39 };
+const KB_PIVOT = { x: 182, y: 48 };
 
 function rotateAround(px, py, cx, cy, deg) {
   const rad = (deg * Math.PI) / 180;
@@ -122,12 +126,12 @@ function rotateAround(px, py, cx, cy, deg) {
 
 // ---- 키보드 생성 ----
 const KB = {
-  gx: 170, gy: 463,
-  u: 17,         // 1u 키 폭
-  kh: 12,        // 메인 키 높이
+  gx: 170, gy: 460,
+  u: 19,         // 1u 키 폭 (살짝 더 키움)
+  kh: 14,        // 메인 키 높이
   gapx: 1.5,
   gapy: 1.5,
-  fnH: 7,        // 펑션 키 높이
+  fnH: 9,        // 펑션 키 높이
   fnGap: 4.5,    // 펑션 ↔ 메인 행 간격
   arrowGap: 4,   // 메인 ↔ 방향키 간격
 };
@@ -264,9 +268,9 @@ ARROW_KEYS.forEach((key) => {
 });
 
 // ---- 상태 ----
-// 키보드와 함께 좌측으로 이동 — 마우스 잡은 팔(오른쪽) 길이 줄임
-let deskMouse = { x: 555, y: 524 };
-const mouseRange = { x: [528, 580], y: [512, 547] };
+// 마우스 어깨 쪽으로 살짝 가까이 — 키보드 우측 끝(약 535)과 7px 정도 여유 유지
+let deskMouse = { x: 580, y: 524 };
+const mouseRange = { x: [560, 605], y: [512, 547] };
 
 // 키보드는 강아지 시점(180° 회전)이라 화면상 좌/우가 일반 키보드와 반대.
 // → 화면 좌측 손(handL)이 갈 home 은 회전 후 화면 좌측에 있는 J(강아지 우손 검지),
@@ -300,6 +304,7 @@ function activity() {
 
 // ---- 입력 처리 (브라우저 DOM / Electron 전역 입력 공용) ----
 // fx, fy 는 화면(또는 창) 내 0~1 비율 좌표
+let mouseIdleWakeup = null;
 function handleMove(fx, fy) {
   fx = clamp(fx, 0, 1);
   fy = clamp(fy, 0, 1);
@@ -307,6 +312,11 @@ function handleMove(fx, fy) {
   deskMouse.y = lerp(mouseRange.y[0], mouseRange.y[1], fy);
   lastMouseMove = performance.now();
   activity();
+  // 마지막 마우스 이벤트로부터 MOUSE_IDLE_MS 뒤에 양손 모드로 자동 전환 — rAF가
+  // 멈춰있어도 한 번 깨워서 손을 home 위치로 이동시켜야 함.
+  if (mouseIdleWakeup) clearTimeout(mouseIdleWakeup);
+  mouseIdleWakeup = setTimeout(scheduleFrame, MOUSE_IDLE_MS + 50);
+  scheduleFrame();
 }
 
 function handleMouseDown(button = 0) {
@@ -317,10 +327,12 @@ function handleMouseDown(button = 0) {
   mouseG.classList.add("dragging");
   // 강아지 시점에 맞춤: 마우스가 180° 회전이라 사용자 좌클릭은 화면 좌측의 버튼(=강아지 우측 = mouseBtnR) 빛남
   flashMouseBtn(button === 2 ? mouseBtnL : mouseBtnR);
+  scheduleFrame();
 }
 function handleMouseUp() {
   mouseDown = false;
   mouseG.classList.remove("dragging");
+  scheduleFrame();
 }
 
 function flashMouseBtn(el) {
@@ -371,6 +383,7 @@ function handleKey(char, code) {
   } else {
     leftTap = { time: now, cx: target.cx, cy: target.cy };
   }
+  scheduleFrame();
 }
 
 // 입력 소스 연결: Electron(전역 입력)이 있으면 그쪽을, 없으면 브라우저 DOM 이벤트를 사용
@@ -379,8 +392,9 @@ if (electronAPI) {
   document.body.classList.add("electron");
   const bg = document.getElementById("bg");
   if (bg) bg.style.display = "none"; // 오버레이에서는 배경 숨김(투명)
-  // 작은 창에 캐릭터가 꽉 차도록 빈 여백을 잘라낸 viewBox (창 비율 360:300=1.2와 일치)
-  svg.setAttribute("viewBox", "120 110 600 500");
+  // 작은 창에 캐릭터가 꽉 차도록 빈 여백을 잘라낸 viewBox (창 비율 1.2:1)
+  // 좌측을 70 까지 확장해서 책상 좌측 옆선이 잘리지 않도록
+  svg.setAttribute("viewBox", "70 110 650 542");
   electronAPI.onInput((d) => {
     if (d.type === "move") handleMove(d.fx, d.fy);
     else if (d.type === "key") handleKey(d.char);
@@ -401,8 +415,16 @@ if (electronAPI) {
   });
 }
 
-// ---- 렌더 루프 ----
+// ---- 렌더 루프 (lazy rAF) ----
+// 입력 이벤트가 들어올 때만 깨어남. 손이 목표 위치에 수렴하고 모든 애니메이션이
+// 끝나면 자동 정지 → idle 시 CPU/GPU 거의 0%.
+let rafId = null;
+function scheduleFrame() {
+  if (rafId == null) rafId = requestAnimationFrame(frame);
+}
+
 function frame() {
+  rafId = null;
   const now = performance.now();
   const k = 0.22; // 보간 강도
 
@@ -450,13 +472,16 @@ function frame() {
   const sRx = shoulderR.x + (handR.x - shoulderR.x) * SHOULDER_FOLLOW_X;
   const sRy = shoulderR.y + (handR.y - shoulderR.y) * SHOULDER_FOLLOW_Y;
 
-  // 다리(rect): 보정된 어깨에서 시작, 손 방향으로 회전, 길이는 어깨~손 거리
-  const lenL = Math.hypot(handL.x - sLx, handL.y - sLy);
+  // 다리(rect): 보정된 어깨에서 시작, 손 방향으로 회전.
+  // 길이는 어깨~손 거리 - HAND_INSET. 0 이면 팔 끝이 손 위치까지 그대로 와서
+  // 손 ellipse 가 팔 끝 둥근 부분과 겹쳐 단일 덩어리처럼 보임.
+  const HAND_INSET = 0;
+  const lenL = Math.max(0, Math.hypot(handL.x - sLx, handL.y - sLy) - HAND_INSET);
   const angL = (Math.atan2(handL.y - sLy, handL.x - sLx) * 180) / Math.PI;
   armLEl.setAttribute("width", lenL.toFixed(1));
   armLEl.setAttribute("transform", `translate(${sLx.toFixed(1)} ${sLy.toFixed(1)}) rotate(${angL.toFixed(2)})`);
 
-  const lenR = Math.hypot(handR.x - sRx, handR.y - sRy);
+  const lenR = Math.max(0, Math.hypot(handR.x - sRx, handR.y - sRy) - HAND_INSET);
   const angR = (Math.atan2(handR.y - sRy, handR.x - sRx) * 180) / Math.PI;
   armREl.setAttribute("width", lenR.toFixed(1));
   armREl.setAttribute("transform", `translate(${sRx.toFixed(1)} ${sRy.toFixed(1)}) rotate(${angR.toFixed(2)})`);
@@ -475,7 +500,16 @@ function frame() {
     `rotate(${CHAR_ROT_DEG} ${CHAR_CENTER.x} ${CHAR_CENTER.y}) translate(0 ${bob.toFixed(2)})`
   );
 
-  requestAnimationFrame(frame);
+  // 수렴 판정 — 손이 목표에 근접 + 모든 시간 기반 애니메이션 종료 → rAF 정지
+  const EPS = 0.1;
+  const handLDone = Math.abs(handL.x - ltx) < EPS && Math.abs(handL.y - lty) < EPS;
+  const handRDone = Math.abs(handR.x - rtx) < EPS && Math.abs(handR.y - rty) < EPS;
+  const tapsDone = (now - leftTap.time >= TAP_MS) && (now - rightTap.time >= TAP_MS);
+  const bobDone = (now - headBobTime >= 200);
+  if (handLDone && handRDone && tapsDone && bobDone) {
+    return; // 정지. 다음 입력이 scheduleFrame() 으로 깨움
+  }
+  rafId = requestAnimationFrame(frame);
 }
 
-requestAnimationFrame(frame);
+scheduleFrame();

@@ -1,9 +1,14 @@
-const { app, BrowserWindow, screen, globalShortcut, Tray, Menu, nativeImage, ipcMain } = require("electron");
+const { app, BrowserWindow, screen, globalShortcut, Tray, Menu, nativeImage, ipcMain, powerMonitor } = require("electron");
 const path = require("path");
 const { uIOhook, UiohookKey } = require("uiohook-napi");
 
+// GPU 가속 비활성화 — 단순 SVG 마스코트라 GPU 프로세스 부담만 됨.
+// 배터리 절약 + RAM 사용량 감소.
+app.disableHardwareAcceleration();
+
 let win = null;
 let tray = null;
+let inputActive = true; // suspend/lock 시 false — 전역 입력 송신 중단
 
 // uiohook 키코드 -> normalized 키 매핑 (렌더러의 키보드 강조에 사용)
 // 렌더러(main.js)의 keyMap 키 이름과 동일해야 함.
@@ -69,14 +74,15 @@ function refreshBounds() {
 }
 
 function send(data) {
+  if (!inputActive) return;
   if (win && !win.isDestroyed() && win.webContents) {
     win.webContents.send("input", data);
   }
 }
 
 // 마스코트 창 크기 (작게, 화면 전체를 덮지 않음)
-const WIN_W = 240;
-const WIN_H = 200;
+const WIN_W = 220;
+const WIN_H = 183; // 1.2:1 비율 (600:500 viewBox 와 일치)
 const MARGIN = 24;
 
 function createWindow() {
@@ -99,6 +105,7 @@ function createWindow() {
       preload: path.join(__dirname, "preload.js"),
       contextIsolation: true,
       nodeIntegration: false,
+      backgroundThrottling: true,
     },
   });
 
@@ -109,12 +116,17 @@ function createWindow() {
 
 function startGlobalInput() {
   let lastMove = 0;
+  let lastFx = -1, lastFy = -1;
   uIOhook.on("mousemove", (e) => {
     const now = Date.now();
     if (now - lastMove < 16) return; // ~60fps로 제한
-    lastMove = now;
     const fx = (e.x - bounds.x) / bounds.width;
     const fy = (e.y - bounds.y) / bounds.height;
+    // deadband — 정규화 좌표 1/1000 미만(약 1px) 변화는 무시
+    if (Math.abs(fx - lastFx) < 0.001 && Math.abs(fy - lastFy) < 0.001) return;
+    lastMove = now;
+    lastFx = fx;
+    lastFy = fy;
     send({ type: "move", fx, fy });
   });
   uIOhook.on("mousedown", (e) => {
@@ -170,6 +182,12 @@ app.whenReady().then(() => {
   screen.on("display-metrics-changed", refreshBounds);
   screen.on("display-added", refreshBounds);
   screen.on("display-removed", refreshBounds);
+
+  // 화면 잠금/절전 시 입력 송신 중단 — idle 시 부하 제거
+  powerMonitor.on("suspend", () => { inputActive = false; });
+  powerMonitor.on("lock-screen", () => { inputActive = false; });
+  powerMonitor.on("resume", () => { inputActive = true; });
+  powerMonitor.on("unlock-screen", () => { inputActive = true; });
 
   console.log("Desk Buddy 실행됨. 종료하려면 Ctrl+Shift+Q 또는 트레이 메뉴를 사용하세요.");
 });

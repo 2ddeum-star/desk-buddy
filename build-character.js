@@ -46,4 +46,24 @@ if (!fs.existsSync(configSrc)) {
 }
 fs.copyFileSync(configSrc, path.join(ROOT, "character-config.js"));
 
+// 활성 캐릭터의 character.png 로 build/icon.png 자동 생성 (앱 아이콘)
+// characters/{name}/icon.png 가 있으면 그걸 우선, 없으면 character.png 에서 정사각 crop + 512px
+try {
+  const { execSync } = require("child_process");
+  const iconOut = path.join(ROOT, "build", "icon.png");
+  fs.mkdirSync(path.dirname(iconOut), { recursive: true });
+  const customIcon = path.join(charDir, "icon.png");
+  if (fs.existsSync(customIcon)) {
+    fs.copyFileSync(customIcon, iconOut);
+    console.log(`[build-character] icon: copied from characters/${character}/icon.png`);
+  } else {
+    const charPng = path.join(charDir, "character.png");
+    const scriptPath = path.join(ROOT, "scripts", "make-icon.py");
+    execSync(`python "${scriptPath}" "${charPng}" "${iconOut}"`, { stdio: "inherit" });
+    console.log(`[build-character] icon: regenerated from characters/${character}/character.png`);
+  }
+} catch (err) {
+  console.warn(`[build-character] icon generation skipped: ${err.message}`);
+}
+
 console.log(`[build-character] active character: ${character}`);
