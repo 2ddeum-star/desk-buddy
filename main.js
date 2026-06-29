@@ -14,6 +14,7 @@ const handLEl = document.getElementById("handL");
 const handREl = document.getElementById("handR");
 const mouseBtnL = document.getElementById("mouseBtnL");
 const mouseBtnR = document.getElementById("mouseBtnR");
+const mouseWheelEl = document.getElementById("mouseWheel");
 
 // 활성 캐릭터 설정 — character-config.js 가 window.CHARACTER_CONFIG 를 정의.
 // 파일이 없거나 누락 필드가 있을 때를 대비한 fallback (poodle 기본값).
@@ -136,90 +137,115 @@ const KB = {
   arrowGap: 4,   // 메인 ↔ 방향키 간격
 };
 
-// 펑션 행 (Esc + F1~F12)
+// 펑션 행 — c: 컬러 그룹 (yellow/peach/coral/pink/hot/lav/sky/mint/sage)
 const FN_ROW = [
-  { label: "Esc", k: "escape" },
-  { label: "F1", k: "f1" },   { label: "F2", k: "f2" },
-  { label: "F3", k: "f3" },   { label: "F4", k: "f4" },
-  { label: "F5", k: "f5" },   { label: "F6", k: "f6" },
-  { label: "F7", k: "f7" },   { label: "F8", k: "f8" },
-  { label: "F9", k: "f9" },   { label: "F10", k: "f10" },
-  { label: "F11", k: "f11" }, { label: "F12", k: "f12" },
+  { label: "Esc", k: "escape", c: "hot" },
+  { label: "F1",  k: "f1",  c: "sky" },   { label: "F2",  k: "f2",  c: "mint" },
+  { label: "F3",  k: "f3",  c: "yellow" },{ label: "F4",  k: "f4",  c: "lav" },
+  { label: "F5",  k: "f5",  c: "peach" }, { label: "F6",  k: "f6",  c: "pink" },
+  { label: "F7",  k: "f7",  c: "sage" },  { label: "F8",  k: "f8",  c: "coral" },
+  { label: "F9",  k: "f9",  c: "lav" },   { label: "F10", k: "f10", c: "sky" },
+  { label: "F11", k: "f11", c: "mint" },  { label: "F12", k: "f12", c: "hot" },
 ];
 
-// 메인 5행 — w 는 u 의 배수 (생략 시 1)
+// 메인 5행 — w 는 u 의 배수 (생략 시 1). c 는 컬러 그룹.
+// AULA 풍 무지개 파스텔 — 인접 색 안 겹치게 키마다 다양한 톤
 const MAIN_ROWS = [
   [ // 숫자 행
-    { label: "`", k: "`" },
-    { label: "1", k: "1" }, { label: "2", k: "2" }, { label: "3", k: "3" },
-    { label: "4", k: "4" }, { label: "5", k: "5" }, { label: "6", k: "6" },
-    { label: "7", k: "7" }, { label: "8", k: "8" }, { label: "9", k: "9" },
-    { label: "0", k: "0" }, { label: "-", k: "-" }, { label: "=", k: "=" },
-    { label: "⌫", k: "backspace", w: 1.5 },
+    { label: "`", k: "`", c: "peach" },
+    { label: "1", k: "1", c: "yellow" }, { label: "2", k: "2", c: "mint" },  { label: "3", k: "3", c: "sky" },
+    { label: "4", k: "4", c: "lav" },    { label: "5", k: "5", c: "pink" },  { label: "6", k: "6", c: "coral" },
+    { label: "7", k: "7", c: "sage" },   { label: "8", k: "8", c: "sky" },   { label: "9", k: "9", c: "lav" },
+    { label: "0", k: "0", c: "pink" },   { label: "-", k: "-", c: "yellow" },{ label: "=", k: "=", c: "mint" },
+    { label: "⌫", k: "backspace", w: 1.5, c: "yellow" },
   ],
   [ // Tab + QWERTY 행
-    { label: "Tab", k: "tab", w: 1.5 },
-    { label: "Q", k: "q" }, { label: "W", k: "w" }, { label: "E", k: "e" },
-    { label: "R", k: "r" }, { label: "T", k: "t" }, { label: "Y", k: "y" },
-    { label: "U", k: "u" }, { label: "I", k: "i" }, { label: "O", k: "o" },
-    { label: "P", k: "p" }, { label: "[", k: "[" }, { label: "]", k: "]" },
-    { label: "\\", k: "\\" },
+    { label: "Tab", k: "tab", w: 1.5, c: "pink" },
+    { label: "Q", k: "q", c: "mint" },   { label: "W", k: "w", c: "lav" },   { label: "E", k: "e", c: "yellow" },
+    { label: "R", k: "r", c: "pink" },   { label: "T", k: "t", c: "sky" },   { label: "Y", k: "y", c: "peach" },
+    { label: "U", k: "u", c: "lav" },    { label: "I", k: "i", c: "mint" },  { label: "O", k: "o", c: "yellow" },
+    { label: "P", k: "p", c: "coral" },  { label: "[", k: "[", c: "sage" },  { label: "]", k: "]", c: "sky" },
+    { label: "\\", k: "\\", c: "peach" },
   ],
   [ // Caps + ASDF + Enter 행
-    { label: "Caps", k: "capslock", w: 1.7 },
-    { label: "A", k: "a" }, { label: "S", k: "s" }, { label: "D", k: "d" },
-    { label: "F", k: "f" }, { label: "G", k: "g" }, { label: "H", k: "h" },
-    { label: "J", k: "j" }, { label: "K", k: "k" }, { label: "L", k: "l" },
-    { label: ";", k: ";" }, { label: "'", k: "'" },
-    { label: "Enter", k: "enter", w: 1.8 },
+    { label: "Caps", k: "capslock", w: 1.7, c: "coral" },
+    { label: "A", k: "a", c: "yellow" }, { label: "S", k: "s", c: "lav" },   { label: "D", k: "d", c: "mint" },
+    { label: "F", k: "f", c: "sky" },    { label: "G", k: "g", c: "pink" },  { label: "H", k: "h", c: "peach" },
+    { label: "J", k: "j", c: "lav" },    { label: "K", k: "k", c: "sage" },  { label: "L", k: "l", c: "yellow" },
+    { label: ";", k: ";", c: "pink" },   { label: "'", k: "'", c: "mint" },
+    { label: "Enter", k: "enter", w: 1.8, c: "hot" },
   ],
   [ // Shift + ZXCV + Shift 행 — 좌/우 분리
-    // 회전 후 첫 번째(로컬 좌측) 키는 화면 우측에 보임 → "_r", 마지막 키는 화면 좌측 → "_l"
-    { label: "Shift", k: "shift_r", w: 2.2 },
-    { label: "Z", k: "z" }, { label: "X", k: "x" }, { label: "C", k: "c" },
-    { label: "V", k: "v" }, { label: "B", k: "b" }, { label: "N", k: "n" },
-    { label: "M", k: "m" }, { label: ",", k: "," }, { label: ".", k: "." },
-    { label: "/", k: "/" }, { label: "Shift", k: "shift_l", w: 2.3 },
+    { label: "Shift", k: "shift_r", w: 2.2, c: "pink" },
+    { label: "Z", k: "z", c: "sky" },    { label: "X", k: "x", c: "mint" },  { label: "C", k: "c", c: "yellow" },
+    { label: "V", k: "v", c: "lav" },    { label: "B", k: "b", c: "peach" }, { label: "N", k: "n", c: "pink" },
+    { label: "M", k: "m", c: "coral" },  { label: ",", k: ",", c: "sage" },  { label: ".", k: ".", c: "lav" },
+    { label: "/", k: "/", c: "mint" },   { label: "Shift", k: "shift_l", w: 2.3, c: "coral" },
   ],
-  [ // Ctrl/Alt 좌/우 분리, Win 은 통합
-    { label: "Ctrl", k: "control_r", w: 1.5 },
-    { label: "Win", k: "meta", w: 1.2 },
-    { label: "Alt", k: "alt_r", w: 1.2 },
-    { label: "", k: " ", w: 5.7 },
-    { label: "Alt", k: "alt_l", w: 1.2 },
-    { label: "Win", k: "meta", w: 1.2 },
-    { label: "Fn", k: "fn", w: 1 },
-    { label: "Ctrl", k: "control_l", w: 1.5 },
+  [ // Ctrl/Alt/Win 모두 좌/우 분리. Space 는 사진의 베이비 블루 분위기 → sky
+    { label: "Ctrl", k: "control_r", w: 1.5, c: "mint" },
+    { label: "Win",  k: "meta_r",    w: 1.2, c: "coral" },
+    { label: "Alt",  k: "alt_r",     w: 1.2, c: "yellow" },
+    { label: "",     k: " ",         w: 5.7, c: "sky" },
+    { label: "Alt",  k: "alt_l",     w: 1.2, c: "lav" },
+    { label: "Win",  k: "meta_l",    w: 1.2, c: "pink" },
+    { label: "Fn",   k: "fn",        w: 1,   c: "peach" },
+    { label: "Ctrl", k: "control_l", w: 1.5, c: "mint" },
   ],
 ];
 
-// 우측 방향키 (인버티드 T)
+// 우측 방향키 (인버티드 T) — 무지개 액센트
 const ARROW_KEYS = [
-  { label: "▲", k: "arrowup",    col: 1, row: 3 },
-  { label: "◀", k: "arrowleft",  col: 0, row: 4 },
-  { label: "▼", k: "arrowdown",  col: 1, row: 4 },
-  { label: "▶", k: "arrowright", col: 2, row: 4 },
+  { label: "▲", k: "arrowup",    col: 1, row: 3, c: "hot" },
+  { label: "◀", k: "arrowleft",  col: 0, row: 4, c: "yellow" },
+  { label: "▼", k: "arrowdown",  col: 1, row: 4, c: "mint" },
+  { label: "▶", k: "arrowright", col: 2, row: 4, c: "lav" },
 ];
 
 // normalized 키 -> [{el, cx, cy, localCx}, ...] (좌/우 Shift 처럼 같은 키가 여러 개일 수 있어 배열)
 const keyMap = {};
 
-function makeKey(label, x, y, w, h, normalized, sizeClass) {
+function makeKey(label, x, y, w, h, normalized, sizeClass, colorGroup) {
   const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
-  g.setAttribute("class", "key" + (sizeClass ? " " + sizeClass : ""));
+  const classes = ["key"];
+  if (sizeClass) classes.push(sizeClass);
+  if (colorGroup) classes.push("kc-" + colorGroup);
+  g.setAttribute("class", classes.join(" "));
   g.setAttribute("transform", `translate(${x} ${y})`);
 
-  const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+  const NS = "http://www.w3.org/2000/svg";
+  const rect = document.createElementNS(NS, "rect");
+  rect.setAttribute("class", "key-cap");
   rect.setAttribute("width", w);
   rect.setAttribute("height", h);
   rect.setAttribute("rx", Math.min(3, h * 0.3));
 
-  const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+  // 상단 광택 — 키캡 위쪽 절반에 옅은 화이트 그라데이션 면. 입체감의 핵심.
+  const hi = document.createElementNS(NS, "rect");
+  hi.setAttribute("class", "key-hi");
+  hi.setAttribute("x", 0.6);
+  hi.setAttribute("y", 0.6);
+  hi.setAttribute("width", Math.max(0, w - 1.2));
+  hi.setAttribute("height", h * 0.42);
+  hi.setAttribute("rx", Math.min(2.4, h * 0.25));
+
+  // 하단 미세 음각 — 키캡 아랫면이 살짝 안쪽으로 들어가는 느낌
+  const lo = document.createElementNS(NS, "rect");
+  lo.setAttribute("class", "key-lo");
+  lo.setAttribute("x", 0.6);
+  lo.setAttribute("y", h - h * 0.18);
+  lo.setAttribute("width", Math.max(0, w - 1.2));
+  lo.setAttribute("height", h * 0.15);
+  lo.setAttribute("rx", Math.min(1.8, h * 0.2));
+
+  const text = document.createElementNS(NS, "text");
   text.setAttribute("x", w / 2);
   text.setAttribute("y", h / 2);
   text.textContent = label;
 
   g.appendChild(rect);
+  g.appendChild(lo);
+  g.appendChild(hi);
   g.appendChild(text);
   keyboardG.appendChild(g);
 
@@ -241,7 +267,7 @@ function makeKey(label, x, y, w, h, normalized, sizeClass) {
 {
   let x = 0;
   FN_ROW.forEach((key) => {
-    makeKey(key.label, x, 0, KB.u, KB.fnH, key.k, "fn");
+    makeKey(key.label, x, 0, KB.u, KB.fnH, key.k, "fn", key.c);
     x += KB.u + KB.gapx;
   });
 }
@@ -254,7 +280,7 @@ MAIN_ROWS.forEach((row, r) => {
   row.forEach((key) => {
     const kw = (key.w || 1) * KB.u;
     const sizeClass = key.label.length > 1 ? "mod" : "";
-    makeKey(key.label, x, y, kw, KB.kh, key.k, sizeClass);
+    makeKey(key.label, x, y, kw, KB.kh, key.k, sizeClass, key.c);
     x += kw + KB.gapx;
   });
 });
@@ -264,7 +290,7 @@ const MAIN_TOTAL_W = 14.5 * KB.u + 13 * KB.gapx;
 ARROW_KEYS.forEach((key) => {
   const x = MAIN_TOTAL_W + KB.arrowGap + key.col * (KB.u + KB.gapx);
   const y = MAIN_OFFSET_Y + key.row * (KB.kh + KB.gapy);
-  makeKey(key.label, x, y, KB.u, KB.kh, key.k, "arrow");
+  makeKey(key.label, x, y, KB.u, KB.kh, key.k, "arrow", key.c);
 });
 
 // ---- 상태 ----
@@ -335,6 +361,15 @@ function handleMouseUp() {
   scheduleFrame();
 }
 
+// 마우스 휠 굴리기 — 휠에 잠깐 컬러 점등 (연속 굴림은 타이머 갱신)
+let wheelTimeout = null;
+function handleWheel() {
+  if (!mouseWheelEl) return;
+  mouseWheelEl.classList.add("scrolling");
+  if (wheelTimeout) clearTimeout(wheelTimeout);
+  wheelTimeout = setTimeout(() => mouseWheelEl.classList.remove("scrolling"), 220);
+}
+
 function flashMouseBtn(el) {
   if (!el) return;
   el.classList.add("flash");
@@ -344,11 +379,14 @@ function flashMouseBtn(el) {
 function normalizeKey(rawKey, code) {
   if (rawKey == null) return null;
   const k = String(rawKey);
-  // Control/Shift/Alt 좌/우 분리 (KeyboardEvent.code 기반). Meta 는 통합.
+  // Control/Shift/Alt/Meta 좌/우 분리 (KeyboardEvent.code 기반).
   if (code) {
     if (k === "Control") return code === "ControlRight" ? "control_r" : "control_l";
     if (k === "Shift")   return code === "ShiftRight"   ? "shift_r"   : "shift_l";
     if (k === "Alt")     return code === "AltRight"     ? "alt_r"     : "alt_l";
+    if (k === "Meta" || k === "OS") {
+      return (code === "MetaRight" || code === "OSRight") ? "meta_r" : "meta_l";
+    }
   }
   if (k.length === 1) return k.toLowerCase();
   if (k.toLowerCase() === "space") return " ";
@@ -400,6 +438,7 @@ if (electronAPI) {
     else if (d.type === "key") handleKey(d.char);
     else if (d.type === "mousedown") handleMouseDown(d.button || 0);
     else if (d.type === "mouseup") handleMouseUp();
+    else if (d.type === "wheel") handleWheel();
   });
 
 } else {
@@ -408,6 +447,7 @@ if (electronAPI) {
   );
   window.addEventListener("mousedown", (e) => handleMouseDown(e.button));
   window.addEventListener("mouseup", handleMouseUp);
+  window.addEventListener("wheel", handleWheel, { passive: true });
   window.addEventListener("contextmenu", (e) => e.preventDefault());
   window.addEventListener("keydown", (e) => {
     if (e.repeat) return;

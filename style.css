@@ -75,33 +75,48 @@ body.electron .hint {
   display: none;
 }
 
-/* 키보드 본체 — 중성적인 다크 그레이 톤 (Apple Magic Keyboard 다크 느낌) */
+/* 키보드 본체 — 따뜻한 누드 베이지 (모든 파스텔 키캡과 무난히 어울리는 중성 톤) */
 .kb-base {
-  fill: #2a2d35;
-  stroke: #4a4d55;
-  stroke-width: 1;
+  fill: #ece2d2;
+  stroke: #cab48f;
+  stroke-width: 1.2;
 }
 .kb-base-shadow {
-  fill: rgba(0, 0, 0, 0.45);
+  fill: rgba(60, 40, 20, 0.18);
   stroke: none;
 }
 .kb-base-inset {
   fill: none;
-  stroke: #14161b;
+  stroke: #d8c9ad;
   stroke-width: 1;
 }
 
-/* 키캡: 키 사이 음각이 보이도록 살짝 어둡고 깔끔하게 */
-.key rect {
-  fill: #3a3d47;
-  stroke: #1a1c22;
-  stroke-width: 0.5;
-  transition: fill 0.08s ease;
-  filter: drop-shadow(0 0.4px 0 rgba(255, 255, 255, 0.08));
+/* 키캡 본체 — 진한 라인 + 입체 그림자 */
+.key .key-cap {
+  fill: #ffffff;
+  stroke: #c8b8c0;
+  stroke-width: 0.75;
+  transition: fill 0.12s ease, stroke 0.12s ease;
+  filter: drop-shadow(0 1px 0.6px rgba(40, 25, 50, 0.28))
+          drop-shadow(0 0.3px 0 rgba(255, 255, 255, 0.65));
+}
+
+/* 키캡 상단 광택 — 옅은 화이트, 위쪽 절반에 광택 면 */
+.key .key-hi {
+  fill: rgba(255, 255, 255, 0.55);
+  stroke: none;
+  pointer-events: none;
+}
+
+/* 키캡 하단 음각 — 살짝 어두운 그림자 (키가 살짝 패인 듯) */
+.key .key-lo {
+  fill: rgba(20, 10, 30, 0.10);
+  stroke: none;
+  pointer-events: none;
 }
 
 .key text {
-  fill: #d8dbe4;
+  fill: #8a8d96;
   font-size: 7.5px;
   font-weight: 500;
   text-anchor: middle;
@@ -110,37 +125,66 @@ body.electron .hint {
   letter-spacing: 0.2px;
 }
 
-/* 펑션 행 (Esc + F1~F12) — 작고 어두운 키 */
-.key.fn rect {
-  fill: #2f323b;
-  stroke: #14161b;
+/* 펑션 행 (Esc + F1~F12) — 컬러 미지정 시 디폴트 톤 */
+.key.fn .key-cap {
+  fill: #faf7f2;
+  stroke: #c5b8a2;
 }
 .key.fn text {
   font-size: 5px;
-  fill: #b8bcc8;
+  fill: #adb0b8;
   letter-spacing: 0;
 }
 
-/* modifier 키 (Tab, Caps, Shift, Ctrl, Alt, Win, Enter, Backspace 등) — 폭이 넓어서 라벨 작게 */
+/* modifier 키 (Tab, Caps, Shift, Ctrl, Alt, Win, Enter, Backspace 등) */
 .key.mod text {
   font-size: 5.5px;
-  fill: #c8ccd6;
+  fill: #9a9ea7;
   letter-spacing: 0;
 }
 
 /* 방향키 — 화살표 글리프는 약간 크게 */
 .key.arrow text {
   font-size: 9px;
-  fill: #d8dbe4;
+  fill: #8a8d96;
 }
 
-.key.active rect {
-  fill: #ffd166;
-}
+/* ===== 키캡 컬러 그룹 (AULA 무지개 파스텔) — 본체 rect 만 칠함 ===== */
+.key.kc-yellow .key-cap { fill: #fde08a; stroke: #c89a30; }
+.key.kc-peach  .key-cap { fill: #fbc89a; stroke: #c87a3a; }
+.key.kc-coral  .key-cap { fill: #f9968a; stroke: #c44c3c; }
+.key.kc-pink   .key-cap { fill: #f8c2cf; stroke: #c67388; }
+.key.kc-hot    .key-cap { fill: #f77ba0; stroke: #ad3c63; }
+.key.kc-lav    .key-cap { fill: #c9a3df; stroke: #7a5099; }
+.key.kc-sky    .key-cap { fill: #9bcfe0; stroke: #4a8898; }
+.key.kc-mint   .key-cap { fill: #aee6c9; stroke: #4d9b78; }
+.key.kc-sage   .key-cap { fill: #c5e8a8; stroke: #6b9e44; }
 
+.key.kc-yellow text { fill: #6a4a10; }
+.key.kc-peach  text { fill: #7a3f15; }
+.key.kc-coral  text { fill: #6e2418; font-weight: 600; }
+.key.kc-pink   text { fill: #7a3548; }
+.key.kc-hot    text { fill: #ffffff; font-weight: 600; }
+.key.kc-lav    text { fill: #3f2766; }
+.key.kc-sky    text { fill: #1f4a5a; }
+.key.kc-mint   text { fill: #1f543d; }
+.key.kc-sage   text { fill: #364a1f; }
+
+/* 활성 키 — 다크 키캡 + 네온 마젠타 글로우 (모든 파스텔 위에서 최대 대비) */
+.key.active .key-cap {
+  fill: #0f0a1a;
+  stroke: #ff2e8a;
+  stroke-width: 1.6;
+  filter: drop-shadow(0 0 4px rgba(255, 46, 138, 1))
+          drop-shadow(0 0 9px rgba(255, 46, 138, 0.6));
+}
 .key.active text {
-  fill: #2b2118;
+  fill: #ff7fb5;
+  font-weight: 800;
 }
+/* 활성 시 광택/음각 면 숨김 — 다크 키캡이 또렷이 보이도록 */
+.key.active .key-hi { fill: rgba(255, 100, 180, 0.18); }
+.key.active .key-lo { display: none; }
 
 /* 다리: 몸통 텍스처 그대로 — 캐릭터별 톤 유지 위해 보정 최소화 */
 #armL, #armR {
@@ -151,19 +195,30 @@ body.electron .hint {
   filter: none;
 }
 
-/* 마우스 좌/우 버튼: 클릭 시 잠깐 빛남 */
+/* 키보드/마우스 — 책상 위에 살짝 떠 있는 듯한 부드러운 그림자 */
+#keyboard {
+  filter: drop-shadow(0 2.4px 1.6px rgba(70, 50, 30, 0.20))
+          drop-shadow(0 0.6px 0.4px rgba(70, 50, 30, 0.10));
+}
+#mouse {
+  filter: drop-shadow(0 1.8px 1.2px rgba(70, 50, 30, 0.22))
+          drop-shadow(0 0.4px 0.3px rgba(70, 50, 30, 0.10));
+}
+
+/* 마우스 좌/우 버튼: 클릭 시 잠깐 빛남 — 라벤더 톤으로 통일 */
 .mouse-btn {
   transition: fill 0.25s ease-out;
 }
 
 .mouse-btn.flash {
-  fill: #ffd166;
+  fill: #ff2e8a;
 }
 
-/* 마우스 드래그(좌/우 버튼 누른 상태) — 휠에만 노란 컬러 점등 */
+/* 마우스 휠 — 드래그(버튼 누름) 또는 휠 스크롤 시 비비드 옐로우 점등 */
 #mouseWheel {
-  transition: fill 0.15s ease;
+  transition: fill 0.18s ease;
 }
-#mouse.dragging #mouseWheel {
-  fill: #ffd166;
+#mouse.dragging #mouseWheel,
+#mouseWheel.scrolling {
+  fill: #ff2e8a;
 }

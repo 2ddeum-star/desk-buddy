@@ -16,29 +16,29 @@
           <stop offset="100%" stop-color="#1a1b33" />
         </linearGradient>
         <linearGradient id="deskGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#6b4f3a" />
-          <stop offset="100%" stop-color="#4a3526" />
+          <stop offset="0%" stop-color="#d0cec8" />
+          <stop offset="100%" stop-color="#a8a69e" />
         </linearGradient>
-        <!-- 책상 윗면(위에서 보는 시점) — 살짝 그라데이션으로 깊이감 -->
+        <!-- 책상 윗면 — 살짝 톤다운된 오프화이트 (페이퍼 느낌) -->
         <linearGradient id="deskTopGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#8e6c4c" />
-          <stop offset="100%" stop-color="#74553c" />
+          <stop offset="0%" stop-color="#f4f2ee" />
+          <stop offset="100%" stop-color="#e2dfd8" />
         </linearGradient>
         <!-- 책상 윗면 아래 음각 그림자 -->
         <linearGradient id="deskEdgeShadow" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="rgba(0,0,0,0.4)" />
+          <stop offset="0%" stop-color="rgba(0,0,0,0.20)" />
           <stop offset="100%" stop-color="rgba(0,0,0,0)" />
         </linearGradient>
-        <!-- 마우스 본체 그라데이션 -->
+        <!-- 마우스 본체 그라데이션 — 키보드 본체 베이지(#ece2d2)와 톤 통일 -->
         <linearGradient id="mouseGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#f3f5f8" />
-          <stop offset="55%" stop-color="#dadee5" />
-          <stop offset="100%" stop-color="#a8aeb8" />
+          <stop offset="0%" stop-color="#faf2e3" />
+          <stop offset="55%" stop-color="#ece2d2" />
+          <stop offset="100%" stop-color="#bfaf8e" />
         </linearGradient>
         <!-- 마우스 버튼 (살짝 더 밝게, 본체와 미세 차이) -->
         <linearGradient id="mouseBtnGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#f7f9fc" />
-          <stop offset="100%" stop-color="#c8cdd6" />
+          <stop offset="0%" stop-color="#fdf7eb" />
+          <stop offset="100%" stop-color="#d8c9ad" />
         </linearGradient>
         <radialGradient id="glow" cx="50%" cy="35%" r="60%">
           <stop offset="0%" stop-color="#3a3d6e" />
@@ -100,14 +100,14 @@
         <!-- 책상에 떨어지는 옅은 그림자 -->
         <ellipse cx="0" cy="4" rx="20" ry="27" fill="rgba(0,0,0,0.22)" />
         <!-- 본체 -->
-        <ellipse cx="0" cy="0" rx="18" ry="26" fill="url(#mouseGrad)" stroke="#7d848e" stroke-width="0.8" />
+        <ellipse cx="0" cy="0" rx="18" ry="26" fill="url(#mouseGrad)" stroke="#9c8866" stroke-width="0.8" />
         <!-- 좌/우 버튼 (마우스 윗부분 절반) -->
         <path id="mouseBtnL" class="mouse-btn" d="M -18 -2 A 18 26 0 0 1 0 -26 L 0 -2 Z" fill="url(#mouseBtnGrad)" />
         <path id="mouseBtnR" class="mouse-btn" d="M 0 -26 A 18 26 0 0 1 18 -2 L 0 -2 Z" fill="url(#mouseBtnGrad)" />
         <!-- 가운데 구분선 (얇게) -->
-        <line x1="0" y1="-25" x2="0" y2="-3" stroke="#9aa1ab" stroke-width="0.7" />
+        <line x1="0" y1="-25" x2="0" y2="-3" stroke="#b09c75" stroke-width="0.7" />
         <!-- 휠 -->
-        <rect id="mouseWheel" x="-2.5" y="-19" width="5" height="10" rx="2.5" fill="#7a818c" />
+        <rect id="mouseWheel" x="-2.5" y="-19" width="5" height="10" rx="2.5" fill="#8a7a58" />
       </g>
 
       <!-- ===== 강아지 다리/발 (단순 SVG) ===== -->

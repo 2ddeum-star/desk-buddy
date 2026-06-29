@@ -42,7 +42,11 @@ for (const [name, code] of Object.entries(UiohookKey)) {
   else if (/Right$/.test(name) && /^Alt/.test(name)) mapped = "alt_r";
   else if (/^Alt/.test(name)) mapped = "alt_l";
   else if (/^(Ctrl|Control)/.test(name)) mapped = "control_l";
-  else if (/^Meta/.test(name)) mapped = "meta";
+  // Meta(Win/Cmd) 좌/우 분리. 정확 매칭 먼저, fallback 으로 정규식.
+  else if (name === "MetaRight") mapped = "meta_r";
+  else if (name === "Meta" || name === "MetaLeft") mapped = "meta_l";
+  else if (/Right$/.test(name) && /^Meta/.test(name)) mapped = "meta_r";
+  else if (/^Meta/.test(name)) mapped = "meta_l";
   else if (name === "Minus") mapped = "-";
   else if (name === "Equal") mapped = "=";
   else if (name === "BracketLeft") mapped = "[";
@@ -135,6 +139,7 @@ function startGlobalInput() {
     send({ type: "mousedown", button });
   });
   uIOhook.on("mouseup", () => send({ type: "mouseup" }));
+  uIOhook.on("wheel", () => send({ type: "wheel" }));
   uIOhook.on("keydown", (e) => {
     send({ type: "key", char: code2char[e.keycode] || null });
   });
