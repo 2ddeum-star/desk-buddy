@@ -28,6 +28,12 @@ for (const [name, code] of Object.entries(UiohookKey)) {
   else if (name === "ArrowDown") mapped = "arrowdown";
   else if (name === "ArrowLeft") mapped = "arrowleft";
   else if (name === "ArrowRight") mapped = "arrowright";
+  else if (name === "Delete") mapped = "delete";
+  else if (name === "Insert") mapped = "insert";
+  else if (name === "Home") mapped = "home";
+  else if (name === "End") mapped = "end";
+  else if (name === "PageUp") mapped = "pageup";
+  else if (name === "PageDown") mapped = "pagedown";
   // Ctrl/Shift/Alt 좌/우 분리. Meta 만 통합.
   // 정확 매칭 먼저 (uiohook-napi enum: Ctrl/CtrlRight, Shift/ShiftRight, Alt/AltRight)
   else if (name === "ShiftRight") mapped = "shift_r";

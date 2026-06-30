@@ -21,24 +21,24 @@
         </linearGradient>
         <!-- 책상 윗면 — 살짝 톤다운된 오프화이트 (페이퍼 느낌) -->
         <linearGradient id="deskTopGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#f4f2ee" />
-          <stop offset="100%" stop-color="#e2dfd8" />
+          <stop offset="0%" stop-color="#eaeaea" />
+          <stop offset="100%" stop-color="#eaeaea" />
         </linearGradient>
         <!-- 책상 윗면 아래 음각 그림자 -->
         <linearGradient id="deskEdgeShadow" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stop-color="rgba(0,0,0,0.20)" />
           <stop offset="100%" stop-color="rgba(0,0,0,0)" />
         </linearGradient>
-        <!-- 마우스 본체 그라데이션 — 키보드 본체 베이지(#ece2d2)와 톤 통일 -->
+        <!-- 마우스 본체 그라데이션 — 키보드 Valentine Pink 본체(#f5b8b3)와 톤 통일 -->
         <linearGradient id="mouseGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#faf2e3" />
-          <stop offset="55%" stop-color="#ece2d2" />
-          <stop offset="100%" stop-color="#bfaf8e" />
+          <stop offset="0%" stop-color="#ffd5cf" />
+          <stop offset="55%" stop-color="#f5b8b3" />
+          <stop offset="100%" stop-color="#c47a73" />
         </linearGradient>
         <!-- 마우스 버튼 (살짝 더 밝게, 본체와 미세 차이) -->
         <linearGradient id="mouseBtnGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#fdf7eb" />
-          <stop offset="100%" stop-color="#d8c9ad" />
+          <stop offset="0%" stop-color="#ffe0db" />
+          <stop offset="100%" stop-color="#d6928a" />
         </linearGradient>
         <radialGradient id="glow" cx="50%" cy="35%" r="60%">
           <stop offset="0%" stop-color="#3a3d6e" />
@@ -88,26 +88,47 @@
 
       <!-- 키보드 (강아지가 사용하는 방향 — 사용자 보기에 180° 뒤집힘) -->
       <!-- 회전 중심은 키보드 로컬 영역의 가운데(본체 박스 중심) -->
-      <g id="keyboard" transform="translate(165 458) rotate(180 182 48)">
-        <!-- 키보드 본체(베이스): 키 뒤에 깔림. 부드러운 모서리로 자연스럽게 -->
-        <rect class="kb-base-shadow" x="-3" y="-1" width="375" height="106" rx="13" />
-        <rect class="kb-base" x="-5" y="-5" width="375" height="106" rx="13" />
-        <rect class="kb-base-inset" x="0" y="0" width="365" height="98" rx="10" />
+      <g id="keyboard" transform="translate(169 458) rotate(180 180 48)">
+        <!-- 키보드 본체: 폭 줄임 (386→370). 회전 중심 188→180, translate 153→169 보정 -->
+        <polygon class="kb-side" points="-5,-5 365,-5 359,-13 1,-13" />
+        <polygon class="kb-base-shadow" points="-3,-1 363,-1 350,102 6,102" />
+        <polygon class="kb-base" points="-5,-5 365,-5 352,98 8,98" />
+        <polygon class="kb-base-inset" points="0,0 360,0 347,93 13,93" />
+        <!-- LCD 패널 (펑션 행 우측 끝) — 현재 시간 표시.
+             keyboard 그룹이 180° 회전이라 안쪽 텍스트를 다시 180° 회전해서 사용자 정방향으로 -->
+        <g id="lcdPanel" transform="translate(272 -2)">
+          <rect class="lcd-bg" width="55" height="15" rx="2.5" />
+          <rect class="lcd-inset" x="2" y="2" width="51" height="11" rx="1.5" />
+          <text id="lcdTime" class="lcd-text" x="27.5" y="7.5" transform="rotate(180 27.5 7.5)">--:--</text>
+        </g>
+        <!-- 빨간 dial (LCD 옆, 바짝 붙임) — 회전 후 사용자 시점 LCD 좌측에 위치 -->
+        <circle class="kb-dial" cx="337" cy="5.5" r="8" />
+        <circle class="kb-dial-rim" cx="337" cy="5.5" r="8" />
+        <circle class="kb-dial-inset" cx="337" cy="5.5" r="5" />
+        <circle class="kb-dial-hi" cx="335" cy="3.5" r="2.5" />
       </g>
 
       <!-- 마우스 (위치/회전은 JS가 갱신) -->
       <g id="mouse">
         <!-- 책상에 떨어지는 옅은 그림자 -->
-        <ellipse cx="0" cy="4" rx="20" ry="27" fill="rgba(0,0,0,0.22)" />
+        <ellipse cx="0" cy="4" rx="20" ry="27" fill="rgba(0,0,0,0.28)" />
+        <!-- 옆면 두께 — 본체보다 약간 큰 어두운 ellipse (둘레 전체에 ring 형태로 보임) -->
+        <ellipse cx="0" cy="1.8" rx="19" ry="27" fill="#9a4d47" />
         <!-- 본체 -->
-        <ellipse cx="0" cy="0" rx="18" ry="26" fill="url(#mouseGrad)" stroke="#9c8866" stroke-width="0.8" />
+        <ellipse cx="0" cy="0" rx="18" ry="26" fill="url(#mouseGrad)" stroke="#a85d57" stroke-width="1" />
         <!-- 좌/우 버튼 (마우스 윗부분 절반) -->
-        <path id="mouseBtnL" class="mouse-btn" d="M -18 -2 A 18 26 0 0 1 0 -26 L 0 -2 Z" fill="url(#mouseBtnGrad)" />
-        <path id="mouseBtnR" class="mouse-btn" d="M 0 -26 A 18 26 0 0 1 18 -2 L 0 -2 Z" fill="url(#mouseBtnGrad)" />
-        <!-- 가운데 구분선 (얇게) -->
-        <line x1="0" y1="-25" x2="0" y2="-3" stroke="#b09c75" stroke-width="0.7" />
+        <path id="mouseBtnL" class="mouse-btn" d="M -18 -2 A 18 26 0 0 1 0 -26 L 0 -2 Z" fill="url(#mouseBtnGrad)" stroke="#c97d77" stroke-width="0.5" />
+        <path id="mouseBtnR" class="mouse-btn" d="M 0 -26 A 18 26 0 0 1 18 -2 L 0 -2 Z" fill="url(#mouseBtnGrad)" stroke="#c97d77" stroke-width="0.5" />
+        <!-- 버튼/본체 분기점 음각 라인 (수평) -->
+        <path d="M -17.5 -2 A 18 26 0 0 1 17.5 -2" fill="none" stroke="rgba(120,50,50,0.45)" stroke-width="0.6" />
+        <!-- 본체 상단 광택 — 입체감 -->
+        <ellipse cx="0" cy="-14" rx="11" ry="6" fill="rgba(255,255,255,0.32)" />
+        <!-- 가운데 구분선 -->
+        <line x1="0" y1="-25" x2="0" y2="-3" stroke="#8b3f3a" stroke-width="0.7" />
+        <!-- 휠 음각 (휠 자리 살짝 패임) -->
+        <rect x="-3" y="-19.5" width="6" height="11" rx="3" fill="rgba(80,30,30,0.25)" />
         <!-- 휠 -->
-        <rect id="mouseWheel" x="-2.5" y="-19" width="5" height="10" rx="2.5" fill="#8a7a58" />
+        <rect id="mouseWheel" x="-2.5" y="-19" width="5" height="10" rx="2.5" fill="#a46862" />
       </g>
 
       <!-- ===== 강아지 다리/발 (단순 SVG) ===== -->

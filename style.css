@@ -75,20 +75,75 @@ body.electron .hint {
   display: none;
 }
 
-/* 키보드 본체 — 따뜻한 누드 베이지 (모든 파스텔 키캡과 무난히 어울리는 중성 톤) */
+/* 빨간 원형 버튼 — 돌출되어 보이도록 그림자 + 외곽 rim + 상단 highlight */
+.kb-dial {
+  fill: #c74142;
+  stroke: #6b1818;
+  stroke-width: 0.8;
+  filter: drop-shadow(0 1.2px 0.8px rgba(0, 0, 0, 0.45))
+          drop-shadow(0 0.4px 0.3px rgba(0, 0, 0, 0.25));
+}
+.kb-dial-rim {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.35);
+  stroke-width: 0.7;
+}
+.kb-dial-inset {
+  fill: #9a2828;
+  stroke: rgba(0, 0, 0, 0.25);
+  stroke-width: 0.4;
+}
+.kb-dial-hi {
+  fill: rgba(255, 220, 220, 0.55);
+  stroke: none;
+}
+
+/* LCD 패널 — 다크 디스플레이 + 옅은 LED 그린 텍스트 */
+.lcd-bg {
+  fill: #1d1f2a;
+  stroke: #2a2d35;
+  stroke-width: 0.8;
+}
+.lcd-inset {
+  fill: #14161f;
+  stroke: none;
+}
+.lcd-text {
+  fill: #c8f0d2;
+  font-family: "Consolas", "Courier New", monospace;
+  font-size: 8.5px;
+  font-weight: 700;
+  text-anchor: middle;
+  dominant-baseline: central;
+  letter-spacing: 0.8px;
+  filter: drop-shadow(0 0 1.5px rgba(184, 230, 196, 0.9));
+}
+
+/* 키보드 본체 — AULA Valentine Pink 톤 */
 .kb-base {
-  fill: #ece2d2;
-  stroke: #cab48f;
+  fill: #f5b8b3;
+  stroke: #c97d77;
   stroke-width: 1.2;
+  stroke-linejoin: round;
 }
 .kb-base-shadow {
-  fill: rgba(60, 40, 20, 0.18);
+  fill: rgba(120, 50, 50, 0.32);
   stroke: none;
 }
 .kb-base-inset {
   fill: none;
-  stroke: #d8c9ad;
-  stroke-width: 1;
+  stroke: #b66d68;
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0.4px 0.3px rgba(120, 50, 50, 0.35));
+}
+/* 키보드 앞쪽 옆면 두께 (book 두께처럼) — 본체보다 어두운 톤, 두껍게 */
+.kb-side {
+  fill: #b66059;
+  stroke: #8b3f3a;
+  stroke-width: 0.9;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 -0.4px 0.3px rgba(80, 30, 30, 0.4));
 }
 
 /* 키캡 본체 — 진한 라인 + 입체 그림자 */
@@ -149,41 +204,27 @@ body.electron .hint {
   fill: #8a8d96;
 }
 
-/* ===== 키캡 컬러 그룹 (AULA 무지개 파스텔) — 본체 rect 만 칠함 ===== */
-.key.kc-yellow .key-cap { fill: #fde08a; stroke: #c89a30; }
-.key.kc-peach  .key-cap { fill: #fbc89a; stroke: #c87a3a; }
-.key.kc-coral  .key-cap { fill: #f9968a; stroke: #c44c3c; }
-.key.kc-pink   .key-cap { fill: #f8c2cf; stroke: #c67388; }
-.key.kc-hot    .key-cap { fill: #f77ba0; stroke: #ad3c63; }
-.key.kc-lav    .key-cap { fill: #c9a3df; stroke: #7a5099; }
-.key.kc-sky    .key-cap { fill: #9bcfe0; stroke: #4a8898; }
-.key.kc-mint   .key-cap { fill: #aee6c9; stroke: #4d9b78; }
-.key.kc-sage   .key-cap { fill: #c5e8a8; stroke: #6b9e44; }
+/* ===== 키캡 컬러 그룹 (AULA Valentine Pink) ===== */
+.key.kc-white .key-cap { fill: #f7f1e5; stroke: #c8b8a0; }
+.key.kc-pink  .key-cap { fill: #f9d4d0; stroke: #d49993; }
+.key.kc-red   .key-cap { fill: #c74142; stroke: #8b2628; }
 
-.key.kc-yellow text { fill: #6a4a10; }
-.key.kc-peach  text { fill: #7a3f15; }
-.key.kc-coral  text { fill: #6e2418; font-weight: 600; }
-.key.kc-pink   text { fill: #7a3548; }
-.key.kc-hot    text { fill: #ffffff; font-weight: 600; }
-.key.kc-lav    text { fill: #3f2766; }
-.key.kc-sky    text { fill: #1f4a5a; }
-.key.kc-mint   text { fill: #1f543d; }
-.key.kc-sage   text { fill: #364a1f; }
+.key.kc-white text { fill: #2a2632; }
+.key.kc-pink  text { fill: #6e2f30; }
+.key.kc-red   text { fill: #ffffff; font-weight: 700; }
 
-/* 활성 키 — 다크 키캡 + 네온 마젠타 글로우 (모든 파스텔 위에서 최대 대비) */
+/* 활성 키 — 마젠타 배경 + 흰 텍스트 + 살짝 글로우 */
 .key.active .key-cap {
-  fill: #0f0a1a;
-  stroke: #ff2e8a;
-  stroke-width: 1.6;
-  filter: drop-shadow(0 0 4px rgba(255, 46, 138, 1))
-          drop-shadow(0 0 9px rgba(255, 46, 138, 0.6));
+  fill: #ff2e8a;
+  stroke: #c01867;
+  stroke-width: 1.2;
+  filter: drop-shadow(0 0 2.5px rgba(255, 46, 138, 0.75));
 }
 .key.active text {
-  fill: #ff7fb5;
-  font-weight: 800;
+  fill: #ffffff;
+  font-weight: 700;
 }
-/* 활성 시 광택/음각 면 숨김 — 다크 키캡이 또렷이 보이도록 */
-.key.active .key-hi { fill: rgba(255, 100, 180, 0.18); }
+.key.active .key-hi { fill: rgba(255, 255, 255, 0.28); }
 .key.active .key-lo { display: none; }
 
 /* 다리: 몸통 텍스처 그대로 — 캐릭터별 톤 유지 위해 보정 최소화 */

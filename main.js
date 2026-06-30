@@ -114,7 +114,7 @@ function toSvg(clientX, clientY) {
 // ---- 키보드/마우스 회전 (강아지가 사용하는 방향, 살짝 비스듬) ----
 // index.html 의 keyboard transform="rotate(185 115 47)" 와 일치해야 함
 const VIEW_ROT_DEG = 185;
-const KB_PIVOT = { x: 182, y: 48 };
+const KB_PIVOT = { x: 180, y: 48 };
 
 function rotateAround(px, py, cx, cy, deg) {
   const rad = (deg * Math.PI) / 180;
@@ -128,78 +128,76 @@ function rotateAround(px, py, cx, cy, deg) {
 // ---- 키보드 생성 ----
 const KB = {
   gx: 170, gy: 460,
-  u: 19,         // 1u 키 폭 (살짝 더 키움)
+  u: 19,         // 1u 키 폭
   kh: 14,        // 메인 키 높이
-  gapx: 1.5,
-  gapy: 1.5,
+  gapx: 1.5,     // 키 사이 가로 갭
+  gapy: 1.5,     // 키 사이 세로 갭
   fnH: 9,        // 펑션 키 높이
   fnGap: 4.5,    // 펑션 ↔ 메인 행 간격
-  arrowGap: 4,   // 메인 ↔ 방향키 간격
+  arrowGap: 3,   // 방향키/우측 컬럼 앞 추가 여백 (메인 키와 살짝 분리)
 };
 
-// 펑션 행 — c: 컬러 그룹 (yellow/peach/coral/pink/hot/lav/sky/mint/sage)
+// 펑션 행 — c: 컬러 그룹 (white/pink/red) — AULA Valentine Pink 풍
 const FN_ROW = [
-  { label: "Esc", k: "escape", c: "hot" },
-  { label: "F1",  k: "f1",  c: "sky" },   { label: "F2",  k: "f2",  c: "mint" },
-  { label: "F3",  k: "f3",  c: "yellow" },{ label: "F4",  k: "f4",  c: "lav" },
-  { label: "F5",  k: "f5",  c: "peach" }, { label: "F6",  k: "f6",  c: "pink" },
-  { label: "F7",  k: "f7",  c: "sage" },  { label: "F8",  k: "f8",  c: "coral" },
-  { label: "F9",  k: "f9",  c: "lav" },   { label: "F10", k: "f10", c: "sky" },
-  { label: "F11", k: "f11", c: "mint" },  { label: "F12", k: "f12", c: "hot" },
+  { label: "Esc", k: "escape", c: "red" },
+  { label: "F1",  k: "f1",  c: "white" }, { label: "F2",  k: "f2",  c: "pink" },
+  { label: "F3",  k: "f3",  c: "pink" },  { label: "F4",  k: "f4",  c: "white" },
+  { label: "F5",  k: "f5",  c: "white" }, { label: "F6",  k: "f6",  c: "pink" },
+  { label: "F7",  k: "f7",  c: "pink" },  { label: "F8",  k: "f8",  c: "white" },
+  { label: "F9",  k: "f9",  c: "white" }, { label: "F10", k: "f10", c: "pink" },
+  { label: "F11", k: "f11", c: "pink" },  { label: "F12", k: "f12", c: "white" },
 ];
 
-// 메인 5행 — w 는 u 의 배수 (생략 시 1). c 는 컬러 그룹.
-// AULA 풍 무지개 파스텔 — 인접 색 안 겹치게 키마다 다양한 톤
+// 메인 5행 — 깔끔한 14.5u 통일. 방향키/추가 컬럼은 별도 그룹으로 메인 우측에 배치
 const MAIN_ROWS = [
   [ // 숫자 행
-    { label: "`", k: "`", c: "peach" },
-    { label: "1", k: "1", c: "yellow" }, { label: "2", k: "2", c: "mint" },  { label: "3", k: "3", c: "sky" },
-    { label: "4", k: "4", c: "lav" },    { label: "5", k: "5", c: "pink" },  { label: "6", k: "6", c: "coral" },
-    { label: "7", k: "7", c: "sage" },   { label: "8", k: "8", c: "sky" },   { label: "9", k: "9", c: "lav" },
-    { label: "0", k: "0", c: "pink" },   { label: "-", k: "-", c: "yellow" },{ label: "=", k: "=", c: "mint" },
-    { label: "⌫", k: "backspace", w: 1.5, c: "yellow" },
+    { label: "`", k: "`", c: "pink" },
+    { label: "1", k: "1", c: "white" }, { label: "2", k: "2", c: "white" }, { label: "3", k: "3", c: "pink" },
+    { label: "4", k: "4", c: "white" }, { label: "5", k: "5", c: "white" }, { label: "6", k: "6", c: "pink" },
+    { label: "7", k: "7", c: "white" }, { label: "8", k: "8", c: "white" }, { label: "9", k: "9", c: "pink" },
+    { label: "0", k: "0", c: "white" }, { label: "-", k: "-", c: "pink" },  { label: "=", k: "=", c: "white" },
+    { label: "⌫", k: "backspace", w: 1.5, c: "red" },
   ],
-  [ // Tab + QWERTY 행
+  [ // QWERTY 행
     { label: "Tab", k: "tab", w: 1.5, c: "pink" },
-    { label: "Q", k: "q", c: "mint" },   { label: "W", k: "w", c: "lav" },   { label: "E", k: "e", c: "yellow" },
-    { label: "R", k: "r", c: "pink" },   { label: "T", k: "t", c: "sky" },   { label: "Y", k: "y", c: "peach" },
-    { label: "U", k: "u", c: "lav" },    { label: "I", k: "i", c: "mint" },  { label: "O", k: "o", c: "yellow" },
-    { label: "P", k: "p", c: "coral" },  { label: "[", k: "[", c: "sage" },  { label: "]", k: "]", c: "sky" },
-    { label: "\\", k: "\\", c: "peach" },
+    { label: "Q", k: "q", c: "white" }, { label: "W", k: "w", c: "white" }, { label: "E", k: "e", c: "pink" },
+    { label: "R", k: "r", c: "white" }, { label: "T", k: "t", c: "white" }, { label: "Y", k: "y", c: "white" },
+    { label: "U", k: "u", c: "pink" },  { label: "I", k: "i", c: "white" }, { label: "O", k: "o", c: "white" },
+    { label: "P", k: "p", c: "pink" },  { label: "[", k: "[", c: "white" }, { label: "]", k: "]", c: "pink" },
+    { label: "\\", k: "\\", c: "white" },
   ],
-  [ // Caps + ASDF + Enter 행
-    { label: "Caps", k: "capslock", w: 1.7, c: "coral" },
-    { label: "A", k: "a", c: "yellow" }, { label: "S", k: "s", c: "lav" },   { label: "D", k: "d", c: "mint" },
-    { label: "F", k: "f", c: "sky" },    { label: "G", k: "g", c: "pink" },  { label: "H", k: "h", c: "peach" },
-    { label: "J", k: "j", c: "lav" },    { label: "K", k: "k", c: "sage" },  { label: "L", k: "l", c: "yellow" },
-    { label: ";", k: ";", c: "pink" },   { label: "'", k: "'", c: "mint" },
-    { label: "Enter", k: "enter", w: 1.8, c: "hot" },
+  [ // ASDF 행
+    { label: "Caps", k: "capslock", w: 1.7, c: "pink" },
+    { label: "A", k: "a", c: "white" }, { label: "S", k: "s", c: "pink" },  { label: "D", k: "d", c: "white" },
+    { label: "F", k: "f", c: "white" }, { label: "G", k: "g", c: "pink" },  { label: "H", k: "h", c: "white" },
+    { label: "J", k: "j", c: "white" }, { label: "K", k: "k", c: "pink" },  { label: "L", k: "l", c: "white" },
+    { label: ";", k: ";", c: "pink" },  { label: "'", k: "'", c: "white" },
+    { label: "Enter", k: "enter", w: 1.8, c: "red" },
   ],
-  [ // Shift + ZXCV + Shift 행 — 좌/우 분리
-    { label: "Shift", k: "shift_r", w: 2.2, c: "pink" },
-    { label: "Z", k: "z", c: "sky" },    { label: "X", k: "x", c: "mint" },  { label: "C", k: "c", c: "yellow" },
-    { label: "V", k: "v", c: "lav" },    { label: "B", k: "b", c: "peach" }, { label: "N", k: "n", c: "pink" },
-    { label: "M", k: "m", c: "coral" },  { label: ",", k: ",", c: "sage" },  { label: ".", k: ".", c: "lav" },
-    { label: "/", k: "/", c: "mint" },   { label: "Shift", k: "shift_l", w: 2.3, c: "coral" },
+  [ // ZXCV 행 — Shift_r 짧게(1.8u)해서 방향키가 안쪽으로 들어오게
+    { label: "Shift", k: "shift_l", w: 2.2, c: "pink" },
+    { label: "Z", k: "z", c: "white" }, { label: "X", k: "x", c: "white" }, { label: "C", k: "c", c: "pink" },
+    { label: "V", k: "v", c: "white" }, { label: "B", k: "b", c: "white" }, { label: "N", k: "n", c: "pink" },
+    { label: "M", k: "m", c: "white" }, { label: ",", k: ",", c: "white" }, { label: ".", k: ".", c: "pink" },
+    { label: "/", k: "/", c: "white" }, { label: "Shift", k: "shift_r", w: 1.8, c: "pink" },
   ],
-  [ // Ctrl/Alt/Win 모두 좌/우 분리. Space 는 사진의 베이비 블루 분위기 → sky
-    { label: "Ctrl", k: "control_r", w: 1.5, c: "mint" },
-    { label: "Win",  k: "meta_r",    w: 1.2, c: "coral" },
-    { label: "Alt",  k: "alt_r",     w: 1.2, c: "yellow" },
-    { label: "",     k: " ",         w: 5.7, c: "sky" },
-    { label: "Alt",  k: "alt_l",     w: 1.2, c: "lav" },
+  [ // 모디파이어 행 — Ctrl_r 짧게(1.0u)해서 방향키가 안쪽으로
+    { label: "Ctrl", k: "control_l", w: 1.5, c: "pink" },
     { label: "Win",  k: "meta_l",    w: 1.2, c: "pink" },
-    { label: "Fn",   k: "fn",        w: 1,   c: "peach" },
-    { label: "Ctrl", k: "control_l", w: 1.5, c: "mint" },
+    { label: "Alt",  k: "alt_l",     w: 1.2, c: "pink" },
+    { label: "",     k: " ",         w: 6.9, c: "red" },
+    { label: "Alt",  k: "alt_r",     w: 1.2, c: "pink" },
+    { label: "Fn",   k: "fn",        w: 1,   c: "pink" },
+    { label: "Ctrl", k: "control_r", w: 1.0, c: "pink" },
   ],
 ];
 
-// 우측 방향키 (인버티드 T) — 무지개 액센트
+// 방향키 인버티드 T — row 3 col 1 (↑), row 4 col 0~2 (←↓→)
 const ARROW_KEYS = [
-  { label: "▲", k: "arrowup",    col: 1, row: 3, c: "hot" },
-  { label: "◀", k: "arrowleft",  col: 0, row: 4, c: "yellow" },
-  { label: "▼", k: "arrowdown",  col: 1, row: 4, c: "mint" },
-  { label: "▶", k: "arrowright", col: 2, row: 4, c: "lav" },
+  { label: "↑", k: "arrowup",    col: 1, row: 3, c: "pink" },
+  { label: "←", k: "arrowleft",  col: 0, row: 4, c: "pink" },
+  { label: "↓", k: "arrowdown",  col: 1, row: 4, c: "pink" },
+  { label: "→", k: "arrowright", col: 2, row: 4, c: "pink" },
 ];
 
 // normalized 키 -> [{el, cx, cy, localCx}, ...] (좌/우 Shift 처럼 같은 키가 여러 개일 수 있어 배열)
@@ -278,20 +276,63 @@ MAIN_ROWS.forEach((row, r) => {
   const y = MAIN_OFFSET_Y + r * (KB.kh + KB.gapy);
   let x = 0;
   row.forEach((key) => {
+    if (key.gap) x += KB.arrowGap; // 우측 키들 앞에 추가 여백
     const kw = (key.w || 1) * KB.u;
+    if (key.spacer) { // 빈 자리 (인버티드 T 정렬용)
+      x += kw + KB.gapx;
+      return;
+    }
     const sizeClass = key.label.length > 1 ? "mod" : "";
     makeKey(key.label, x, y, kw, KB.kh, key.k, sizeClass, key.c);
     x += kw + KB.gapx;
   });
 });
 
-// 우측 방향키 — 메인 영역(14.5u + 13갭) 우측에 인버티드 T 배치
+// 방향키 — ZXCV/모디파이어 행이 14.0u(끝 키 0.5u 줄임)라 방향키가 그 옆에 자연 정렬
 const MAIN_TOTAL_W = 14.5 * KB.u + 13 * KB.gapx;
+const ARROW_X_BASE = 14.0 * KB.u + 14 * KB.gapx; // 14.0u 끝 + 1 gap
 ARROW_KEYS.forEach((key) => {
-  const x = MAIN_TOTAL_W + KB.arrowGap + key.col * (KB.u + KB.gapx);
+  const x = ARROW_X_BASE + key.col * (KB.u + KB.gapx);
   const y = MAIN_OFFSET_Y + key.row * (KB.kh + KB.gapy);
   makeKey(key.label, x, y, KB.u, KB.kh, key.k, "arrow", key.c);
 });
+
+// Win 키 한 개라 OS 우측 Win 입력도 동일 키 점등
+if (keyMap["meta_l"]) keyMap["meta_r"] = keyMap["meta_l"];
+
+// ---- LCD: 입력 타이핑 모드 + idle 시 시계 ----
+const lcdTimeEl = document.getElementById("lcdTime");
+const LCD_MAX_CHARS = 8;             // 한 번에 보여줄 글자 수
+const LCD_IDLE_MS = 2500;            // 무입력 시 시계로 복귀
+let lcdMode = "clock";               // "clock" | "input"
+let lcdBuf = "";
+let lcdIdleTimer = null;
+
+function updateClock() {
+  if (!lcdTimeEl || lcdMode !== "clock") return;
+  const d = new Date();
+  const hh = String(d.getHours()).padStart(2, "0");
+  const mm = String(d.getMinutes()).padStart(2, "0");
+  lcdTimeEl.textContent = `${hh}:${mm}`;
+}
+function pushLcdInput(char) {
+  if (!lcdTimeEl || !char || char.length !== 1) return;
+  const ch = char === " " ? "_" : char.toUpperCase();
+  lcdMode = "input";
+  lcdBuf = (lcdBuf + ch).slice(-LCD_MAX_CHARS);
+  lcdTimeEl.textContent = lcdBuf;
+  if (lcdIdleTimer) clearTimeout(lcdIdleTimer);
+  lcdIdleTimer = setTimeout(() => {
+    lcdMode = "clock";
+    lcdBuf = "";
+    updateClock();
+  }, LCD_IDLE_MS);
+}
+updateClock();
+setTimeout(() => {
+  updateClock();
+  setInterval(updateClock, 60000);
+}, 60000 - (Date.now() % 60000));
 
 // ---- 상태 ----
 // 마우스 어깨 쪽으로 살짝 가까이 — 키보드 우측 끝(약 535)과 7px 정도 여유 유지
@@ -399,6 +440,9 @@ function handleKey(char, code) {
   activity();
   const now = performance.now();
   headBobTime = now;
+
+  // LCD 에 입력 글자 흘리기 (단일 글자만, modifier 등 제외)
+  pushLcdInput(char);
 
   const norm = normalizeKey(char, code);
   const targets = norm && keyMap[norm];
