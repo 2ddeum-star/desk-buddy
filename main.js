@@ -319,6 +319,7 @@ function pushLcdInput(char) {
   if (!lcdTimeEl || !char || char.length !== 1) return;
   const ch = char === " " ? "_" : char.toUpperCase();
   lcdMode = "input";
+  // 강아지 시점 LCD: SVG로컬 우측에 새 글자 추가 (강아지 시점에서 새 글자가 우측에 자연 흐름)
   lcdBuf = (lcdBuf + ch).slice(-LCD_MAX_CHARS);
   lcdTimeEl.textContent = lcdBuf;
   if (lcdIdleTimer) clearTimeout(lcdIdleTimer);
